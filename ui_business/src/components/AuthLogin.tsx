@@ -7,14 +7,13 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 
-import { use, useEffect, useState } from 'react';
+import { useState } from 'react';
 import { signInWithEmailAndPassword, setPersistence, browserSessionPersistence, browserLocalPersistence, sendPasswordResetEmail, signInWithPopup, GoogleAuthProvider, Auth, signInWithRedirect, getRedirectResult, UserCredential, FacebookAuthProvider } from 'firebase/auth';
 import { auth, authGoogleProvider } from '../utils/firebaseConfig';
 import { Copyright } from './CommonComponents';
 import { Alert } from '@mui/material';
 import Divider from '@mui/material/Divider';
 import { JSX } from 'react/jsx-runtime';
-import { get } from 'http';
 
 
 export default function AuthLogin() {

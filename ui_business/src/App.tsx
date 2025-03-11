@@ -10,7 +10,7 @@ import ReceiptIcon from '@mui/icons-material/Receipt';
 
 
 import { JSX } from 'react/jsx-runtime';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { User, getIdTokenResult, onAuthStateChanged, sendEmailVerification } from 'firebase/auth';
 
 import { auth } from './utils/firebaseConfig';
@@ -28,20 +28,23 @@ export default function App() {
     const [loginUser, setLoginUser] = useState<User | undefined>(undefined)
     const [userClaims, setUserClaims] = useState<custom_claims | undefined>(undefined)
 
-    // 1. set up the app bar
-    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+    // 1. create ref height from app bar
+    const [appBarHeight, setAppBarHeight] = useState<number>(0)
+    const appBarRef = useRef<HTMLDivElement>(null);
 
     // 2. set up the drawer list
     const [drawOpen, setDrawerOpen] = useState<boolean>(false)
-    const drawerWidth = 240;
+    const [drawerWidth, setDrawerWidth] = useState<number>(0)
 
     const DrawerList = (
-        <Box sx={{ width: 250, ml: 1, mt: 1 }} role="presentation" onClick={() => setDrawerOpen(false)}>
+        <Box sx={{ width: drawerWidth, ml: 0, mt: 0, display: 'block' }} onClick={() => setDrawerOpen(false)}>
+            <List sx={{ backgroundColor: '#1976d2' }} >
+                <ListItem>
+                    <ListItemIcon> < AccountCircle /> </ListItemIcon>
+                    <ListItemText primary={userClaims?.role}  sx={{ color: 'white' }}/>
+                </ListItem>
+            </List>
             <List>
-                <ListItem>{userClaims && `${auth.currentUser?.displayName} (${userClaims.role})`}</ListItem>
-                <Divider />
-                <ListItem>{auth.currentUser && auth.currentUser.email}</ListItem>
-                <Divider />
                 <ListItemButton>
                     <ListItemIcon> <EventAvailableIcon /> </ListItemIcon>
                     <ListItemText primary="課堂時間表" />
@@ -57,7 +60,7 @@ export default function App() {
                 <Divider />
                 <ListItemButton onClick={() => handleLogOut()}>
                     <ListItemIcon> <Logout /> </ListItemIcon>
-                    <ListItemText primary="登出" />
+                    <ListItemText primary={`登出 ${auth.currentUser?.displayName}`} />
                 </ListItemButton>
             </List>
         </Box>
@@ -68,7 +71,7 @@ export default function App() {
     function handleLogOut() {
         auth.signOut().then(() => {
             console.log('user signed out');
-            window.location.href = '/'
+            setDrawerWidth(0)
         }).catch((error) => {
             console.log(error.message);
         })
@@ -77,6 +80,7 @@ export default function App() {
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             if (user) {
+                setDrawerWidth(220);
                 getIdTokenResult(user).then((idTokenResult) => {
                     const cunstomClaims: custom_claims = {
                         role: idTokenResult.claims.role as 'super-admin' | 'admin' | 'manager' | 'coach' | 'member',
@@ -89,37 +93,53 @@ export default function App() {
                     console.log(auth.currentUser?.email);
                 })
             } else {
+                setDrawerWidth(0);
                 setView(<AuthLogin />);
             }
         })
         return () => { unsubscribe(); }
     }, [auth])
 
+    useEffect(() => {
+        // Get the height of the AppBar after the component mounts
+        if (appBarRef.current) {
+            setAppBarHeight(appBarRef.current.getBoundingClientRect().height);
+        }
+    }, []);
+
+
     return (
-        <Box sx={{ flexGrow: 1 }}>
-            <AppBar position="sticky">
-                <Toolbar >
-                    <Avatar src="/favicon.ico" sx={{ mr: 2 }} />
-                    <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                        赤兔道場-管理系統
-                    </Typography>
-                    {auth.currentUser && <> {/* if user is logged in, show the menu icon */}
-                        <IconButton
-                            size="large"
-                            edge="end"
-                            color="inherit"
-                            aria-label="menu"
-                            onClick={() => setDrawerOpen(true)}
-                        >
-                            <MenuIcon />
-                        </IconButton>
-                    </>}
-                </Toolbar>
-                {auth.currentUser && <Drawer anchor="right" open={drawOpen} onClose={() => setDrawerOpen(false)}>
-                    {DrawerList}
-                </Drawer>}
-            </AppBar>
-            {view}
-        </Box>
+        <Box>
+            <Box sx={{ flexGrow: 1, width: { md: `calc(100% - ${drawerWidth}px)`, xs: '100%' } }}>
+                <AppBar position="sticky" ref={appBarRef}>
+                    <Toolbar >
+                        <Avatar src="/favicon.ico" sx={{ mr: 2 }} />
+                        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+                            赤兔道場-管理系統
+                        </Typography>
+                        {auth.currentUser && <> {/* if user is logged in, show the menu icon */}
+                            <IconButton color="inherit" sx={{ display: { md: 'none' } }} onClick={() => setDrawerOpen(true)} >
+                                <MenuIcon />
+                            </IconButton>
+                        </>}
+                    </Toolbar>
+                </AppBar>
+                {view}
+            </Box>
+            {/* side bar */}
+            {auth.currentUser &&
+                <Box sx={{ width: { md: drawerWidth }, flexShrink: { md: 0 } }}>
+                    {/* xs view */}
+                    <Drawer anchor='right' open={drawOpen} onClose={() => setDrawerOpen(false)} >
+                        {DrawerList}
+                    </Drawer>
+                    {/* md view */}
+                    <Drawer variant='permanent' anchor='right' sx={{ width: drawerWidth, display: { xs: 'none', md: 'block' } }}>
+                        {DrawerList}
+                    </Drawer>
+                </Box>
+            }
+
+        </Box >
     );
 }
