@@ -17,6 +17,8 @@ export function Copyright(props: any) {
     );
 }
 
+export const btnBox = { display: 'flex', alignItems: 'center', justifyContent: 'space-around', width: '100%', my: 2 }
+
 export const styleModalBox = {
     bgcolor: "#fff9e0",
     position: 'absolute' as 'absolute',
@@ -43,3 +45,5 @@ export const styleFormBox = {
     flexDirection: 'column',
     alignItems: 'center'
 }
+
+export const styleMainColBox = { marginTop: 4, display: 'flex', flexDirection: 'column', alignItems: 'center', }

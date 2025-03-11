@@ -1,32 +1,31 @@
-import { Alert, AppBar, Avatar, Box, Button, CircularProgress, Divider, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Menu, MenuItem, Toolbar, Typography } from '@mui/material';
-import MenuIcon from '@mui/icons-material/Menu';
-import { AccountCircle, Logout } from '@mui/icons-material';
-import EventAvailableIcon from '@mui/icons-material/EventAvailable';
-import SettingsIcon from '@mui/icons-material/Settings';
-import AccountBoxIcon from '@mui/icons-material/AccountBox';
-import BookOnlineIcon from '@mui/icons-material/BookOnline';
-import ReceiptIcon from '@mui/icons-material/Receipt';
-
-
-
-import { JSX } from 'react/jsx-runtime';
+// react component for member page
 import { useEffect, useRef, useState } from 'react';
+import { JSX } from 'react/jsx-runtime';
+
+// third party imports
 import { User, getIdTokenResult, onAuthStateChanged, sendEmailVerification } from 'firebase/auth';
 
-import { auth } from './utils/firebaseConfig';
-import { custom_claims } from './utils/dataInterface';
+import { Alert, AppBar, Avatar, Box, Button, CircularProgress, Divider, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Menu, MenuItem, Toolbar, Typography } from '@mui/material';
+import { AccountCircle, Logout } from '@mui/icons-material';
+import MenuIcon from '@mui/icons-material/Menu';
+import EventAvailableIcon from '@mui/icons-material/EventAvailable';
+import AccountBoxIcon from '@mui/icons-material/AccountBox';
+import ReceiptIcon from '@mui/icons-material/Receipt';
 
-// components
+// local components
 import AuthLogin from './components/AuthLogin';
 import Dummy from './components/dummy';
+import Member from './components/Member';
+import { auth } from './utils/firebaseConfig';
+import { CustomClaims } from './utils/dataInterface';
+import { CustomClaimsCtx } from './utils/contexts';
 
 
 export default function App() {
     // This function will handle the layout of the app, and the initial authentication
     const [view, setView] = useState<JSX.Element>(<CircularProgress />)
 
-    const [loginUser, setLoginUser] = useState<User | undefined>(undefined)
-    const [userClaims, setUserClaims] = useState<custom_claims | undefined>(undefined)
+    const [userClaims, setUserClaims] = useState<CustomClaims | undefined>(undefined)
 
     // 1. create ref height from app bar
     const [appBarHeight, setAppBarHeight] = useState<number>(0)
@@ -45,11 +44,11 @@ export default function App() {
                 </ListItem>
             </List>
             <List>
-                <ListItemButton>
+                <ListItemButton >
                     <ListItemIcon> <EventAvailableIcon /> </ListItemIcon>
                     <ListItemText primary="課堂時間表" />
                 </ListItemButton>
-                <ListItemButton>
+                <ListItemButton onClick={() => setView(<Member />)}>
                     <ListItemIcon> <AccountBoxIcon /> </ListItemIcon>
                     <ListItemText primary="會員管理" />
                 </ListItemButton>
@@ -82,7 +81,7 @@ export default function App() {
             if (user) {
                 setDrawerWidth(220);
                 getIdTokenResult(user).then((idTokenResult) => {
-                    const cunstomClaims: custom_claims = {
+                    const cunstomClaims: CustomClaims = {
                         role: idTokenResult.claims.role as 'super-admin' | 'admin' | 'manager' | 'coach' | 'member',
                         roleLevel: idTokenResult.claims.roleLevel as 5 | 4 | 3 | 2 | 1,
                         createdBy: idTokenResult.claims.createdBy as string,
@@ -107,9 +106,8 @@ export default function App() {
         }
     }, []);
 
-
     return (
-        <Box>
+        <CustomClaimsCtx.Provider value={userClaims}>
             <Box sx={{ flexGrow: 1, width: { md: `calc(100% - ${drawerWidth}px)`, xs: '100%' } }}>
                 <AppBar position="sticky" ref={appBarRef}>
                     <Toolbar >
@@ -140,6 +138,6 @@ export default function App() {
                 </Box>
             }
 
-        </Box >
+        </CustomClaimsCtx.Provider >
     );
 }

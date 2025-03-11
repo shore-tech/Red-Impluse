@@ -1,4 +1,9 @@
 import { createContext } from "react";
-import { User } from "firebase/auth";
 
-export const LoginUser = createContext<User | undefined>(undefined);
+
+export const CustomClaimsCtx = createContext<
+    {
+        role: 'super-admin' | 'admin' | 'manager' | 'coach' | 'member',
+        roleLevel: 5 | 4 | 3 | 2 | 1
+    } | undefined
+>(undefined);
