@@ -4,9 +4,11 @@ import { JSX } from 'react/jsx-runtime';
 
 // third party imports
 import { User, getIdTokenResult, onAuthStateChanged, sendEmailVerification } from 'firebase/auth';
-
 import { Alert, AppBar, Avatar, Box, Button, CircularProgress, Divider, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Menu, MenuItem, Toolbar, Typography } from '@mui/material';
 import { AccountCircle, Logout } from '@mui/icons-material';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
+
 import MenuIcon from '@mui/icons-material/Menu';
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import AccountBoxIcon from '@mui/icons-material/AccountBox';
@@ -19,6 +21,15 @@ import Member from './components/Member';
 import { auth } from './utils/firebaseConfig';
 import { CustomClaims } from './utils/dataInterface';
 import { CustomClaimsCtx } from './utils/contexts';
+
+// date time
+import dayjs, { Dayjs } from 'dayjs';
+import 'dayjs/locale/zh-hk';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+dayjs.extend(utc);
+dayjs.extend(timezone);
+dayjs.tz.setDefault("Asia/Hong_Kong");
 
 
 export default function App() {
@@ -40,7 +51,7 @@ export default function App() {
             <List sx={{ backgroundColor: '#1976d2' }} >
                 <ListItem>
                     <ListItemIcon> < AccountCircle /> </ListItemIcon>
-                    <ListItemText primary={userClaims?.role}  sx={{ color: 'white' }}/>
+                    <ListItemText primary={userClaims?.role} sx={{ color: 'white' }} />
                 </ListItem>
             </List>
             <List>
@@ -107,37 +118,39 @@ export default function App() {
     }, []);
 
     return (
-        <CustomClaimsCtx.Provider value={userClaims}>
-            <Box sx={{ flexGrow: 1, width: { md: `calc(100% - ${drawerWidth}px)`, xs: '100%' } }}>
-                <AppBar position="sticky" ref={appBarRef}>
-                    <Toolbar >
-                        <Avatar src="/favicon.ico" sx={{ mr: 2 }} />
-                        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                            赤兔道場-管理系統
-                        </Typography>
-                        {auth.currentUser && <> {/* if user is logged in, show the menu icon */}
-                            <IconButton color="inherit" sx={{ display: { md: 'none' } }} onClick={() => setDrawerOpen(true)} >
-                                <MenuIcon />
-                            </IconButton>
-                        </>}
-                    </Toolbar>
-                </AppBar>
-                {view}
-            </Box>
-            {/* side bar */}
-            {auth.currentUser &&
-                <Box sx={{ width: { md: drawerWidth }, flexShrink: { md: 0 } }}>
-                    {/* xs view */}
-                    <Drawer anchor='right' open={drawOpen} onClose={() => setDrawerOpen(false)} >
-                        {DrawerList}
-                    </Drawer>
-                    {/* md view */}
-                    <Drawer variant='permanent' anchor='right' sx={{ width: drawerWidth, display: { xs: 'none', md: 'block' } }}>
-                        {DrawerList}
-                    </Drawer>
+        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale='zh-hk'>
+            <CustomClaimsCtx.Provider value={userClaims}>
+                <Box sx={{ width: { md: `calc(100% - ${drawerWidth}px)`, xs: '100%' } }}>
+                    <AppBar position="sticky" ref={appBarRef}>
+                        <Toolbar >
+                            <Avatar src="/favicon.ico" sx={{ mr: 2 }} />
+                            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+                                赤兔道場-管理系統
+                            </Typography>
+                            {auth.currentUser && <> {/* if user is logged in, show the menu icon */}
+                                <IconButton color="inherit" sx={{ display: { md: 'none' } }} onClick={() => setDrawerOpen(true)} >
+                                    <MenuIcon />
+                                </IconButton>
+                            </>}
+                        </Toolbar>
+                    </AppBar>
+                    {view}
                 </Box>
-            }
+                {/* side bar */}
+                {auth.currentUser &&
+                    <Box>
+                        {/* xs view */}
+                        <Drawer anchor='right' sx={{ display: { md: 'none' } }} open={drawOpen} onClose={() => setDrawerOpen(false)} >
+                            {DrawerList}
+                        </Drawer>
+                        {/* md view */}
+                        <Drawer variant='permanent' anchor='right' sx={{ display: { xs: 'none', md: 'block' } }}>
+                            {DrawerList}
+                        </Drawer>
+                    </Box>
+                }
 
-        </CustomClaimsCtx.Provider >
+            </CustomClaimsCtx.Provider >
+        </LocalizationProvider>
     );
 }

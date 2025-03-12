@@ -1,3 +1,4 @@
+import { Margin } from "@mui/icons-material";
 import { Typography } from "@mui/material";
 import Link from '@mui/material/Link';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
@@ -39,11 +40,17 @@ export const styleModalBox = {
     alignItems: 'center'
 }
 
-export const styleFormBox = {
-    marginTop: 2,
+export const styleFormHeadBox = {
+    marginY: 2,
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center'
+
 }
 
-export const styleMainColBox = { marginTop: 4, display: 'flex', flexDirection: 'column', alignItems: 'center', }
+export const styleMainColBox = { 
+    marginTop: 4, 
+    display: 'flex', 
+    flexDirection: 'column', 
+    alignItems: 'center', 
+}

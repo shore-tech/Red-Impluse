@@ -1,5 +1,5 @@
 // react component for member page
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 
 // third party imports
 import { Avatar, Box, Button, Container, Typography } from "@mui/material";
@@ -13,6 +13,7 @@ import { styleMainColBox, btnBox } from "./CommonComponents";
 import { GridMemberRowEntry } from "../utils/dataInterface";
 import { collection, doc, onSnapshot, sum } from "firebase/firestore";
 import { CustomClaimsCtx } from "../utils/contexts";
+import MemberAdd from "./MemberAdd";
 
 
 export default function Member() {
@@ -25,28 +26,28 @@ export default function Member() {
     const [tableRows, setTableRows] = useState<GridMemberRowEntry[]>([])
     const tableCol: GridColDef[] = [
         { field: 'id', headerName: 'ID', type: 'string', minWidth: 60 },
-        { field: 'name', headerName: '姓名', type: 'string', minWidth: 100 },
-        { field: 'gender', headerName: '性別', type: 'string', minWidth: 60, headerAlign: 'center', align: 'center' },
-        { field: 'dateOfBirth', headerName: '生日', type: 'string', minWidth: 100, headerAlign: 'center', align: 'center' },
-        { field: 'mobile', headerName: '電話', type: 'string', minWidth: 100 },
-        { field: 'beltColor', headerName: 'BJJ顏色', type: 'string', minWidth: 80 },
-        { field: 'stripe', headerName: '段數', type: 'number', minWidth: 80, headerAlign: 'center', align: 'center' },
-        { field: 'promotionDate', headerName: '晉升日期', type: 'string', minWidth: 100 },
-        { field: 'mbsExpDate', headerName: '會藉到期日', type: 'string', minWidth: 100 },
+        { field: 'name', headerName: '姓名', type: 'string', minWidth: 120 },
+        { field: 'gender', headerName: '性別', type: 'string', minWidth: 120, headerAlign: 'center', align: 'center' },
+        { field: 'dateOfBirth', headerName: '生日', type: 'string', minWidth: 120, headerAlign: 'center', align: 'center' },
+        { field: 'mobile', headerName: '電話', type: 'string', minWidth: 120 },
+        { field: 'beltColor', headerName: 'BJJ顏色', type: 'string', minWidth: 120 },
+        { field: 'stripe', headerName: '段數', type: 'number', minWidth: 120, headerAlign: 'center', align: 'center' },
+        { field: 'promotionDate', headerName: '晉升日期', type: 'string', minWidth: 120 },
+        { field: 'mbsExpDate', headerName: '會藉到期日', type: 'string', minWidth: 120 },
     ]
 
-    const userClaimCtx = useState(CustomClaimsCtx);
+    const userClaimCtx = useContext(CustomClaimsCtx);
 
-        // custom toolbar to add new member
-        const CustomToolbar = () => {
-            return (
-                <GridToolbarContainer>
-                    <Button color="primary" startIcon={<AddIcon />} onClick={() => setOpenAddMember(true)}>
-                        新增會員
-                    </Button>
-                </GridToolbarContainer>
-            );
-        }
+    // custom toolbar to add new member
+    const CustomToolbar = () => {
+        return (
+            <GridToolbarContainer>
+                <Button color="primary" startIcon={<AddIcon />} onClick={() => setOpenAddMember(true)}>
+                    新增會員
+                </Button>
+            </GridToolbarContainer>
+        );
+    }
 
     useEffect(() => {
         setIsLoading(true)
@@ -91,17 +92,19 @@ export default function Member() {
                     會員資料
                 </Typography>
             </Box>
-            <DataGrid
-                slots={{ toolbar: CustomToolbar }}
-                loading={isLoading}
-                rows={tableRows}
-                columns={tableCol}
-                onRowDoubleClick={(row) => {
-                    console.log(`double clicked on ${row.row.id}`);
-                }}
-            />
+            <Box sx={{ width: '100%', height: 400, overflow: 'auto' }}>
+                <DataGrid
+                    slots={{ toolbar: CustomToolbar }}
+                    loading={isLoading}
+                    rows={tableRows}
+                    columns={tableCol}
+                    onRowDoubleClick={(row) => {
+                        console.log(`double clicked on ${row.row.id}`);
+                    }}
+                />
+            </Box>
 
-
+            {userClaimCtx && userClaimCtx.roleLevel >= 3 && <MemberAdd open={openAddMember} onClose={() => setOpenAddMember(false)} />}
 
         </Container>
     );

@@ -41,7 +41,7 @@ export interface MemberObj{
 export interface BjjLevel{
     beltColor: string,
     stripe: number,
-    promotionDate: string,
-    promotionBy: string,
+    promotionDate?: string,
+    promotionBy?: string,
     promotionRecord?: BjjLevel,
 }
