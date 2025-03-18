@@ -48,8 +48,8 @@ export default function App() {
 
     const DrawerList = (
         <Box sx={{ width: drawerWidth, ml: 0, mt: 0, display: 'block' }} onClick={() => setDrawerOpen(false)}>
-            <List sx={{ backgroundColor: '#1976d2' }} >
-                <ListItem>
+            <List sx={{ backgroundColor: '#1976d2', height: appBarHeight, padding: 0, boxShadow: 3 }} >
+                <ListItem >
                     <ListItemIcon> < AccountCircle /> </ListItemIcon>
                     <ListItemText primary={userClaims?.role} sx={{ color: 'white' }} />
                 </ListItem>
@@ -90,7 +90,7 @@ export default function App() {
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             if (user) {
-                setDrawerWidth(220);
+                setDrawerWidth(250);
                 getIdTokenResult(user).then((idTokenResult) => {
                     const cunstomClaims: CustomClaims = {
                         role: idTokenResult.claims.role as 'super-admin' | 'admin' | 'manager' | 'coach' | 'member',
@@ -115,7 +115,7 @@ export default function App() {
         if (appBarRef.current) {
             setAppBarHeight(appBarRef.current.getBoundingClientRect().height);
         }
-    }, []);
+    }, [appBarRef]);
 
     return (
         <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale='zh-hk'>
