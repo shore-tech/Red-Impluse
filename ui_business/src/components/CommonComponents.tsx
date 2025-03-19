@@ -1,5 +1,5 @@
 import { Margin } from "@mui/icons-material";
-import { Typography } from "@mui/material";
+import { Alert, AlertColor, Box, Button, Modal, Typography } from "@mui/material";
 import Link from '@mui/material/Link';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 
@@ -53,4 +53,44 @@ export const styleMainColBox = {
     display: 'flex', 
     flexDirection: 'column', 
     alignItems: 'center', 
+}
+
+
+export function MessageBox(props: { open: boolean, onClose: () => void, type: string, message: string }) {
+    let bgColor: string = 'transparent'
+    let serverity: string = 'info'
+    switch (props.type) {
+        case 'info':
+            bgColor = 'info.main'
+            serverity = 'info'
+            break;
+        case 'success':
+            bgColor = 'success.main'
+            serverity = 'success'
+            break;
+        case 'error':
+            bgColor = 'error.main'
+            serverity = 'error'
+            break;
+        default:
+            break;
+    }
+    const syleBox = {
+        position: 'absolute' as 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        bgcolor: bgColor,
+        boxShadow: 24,
+        p: 1,
+    }
+    return (
+        <Modal open={props.open} onClose={props.onClose}>
+            <Box sx={syleBox}>
+                <Alert variant="filled" severity={serverity as AlertColor}>{props.message}</Alert>
+                <Box sx={btnBox}><Button variant="contained" onClick={props.onClose}>ok</Button></Box>
+            </Box>
+        </Modal>
+    )
+
 }

@@ -43,5 +43,5 @@ export interface BjjLevel{
     stripe: number,
     promotionDate?: string,
     promotionBy?: string,
-    promotionRecord?: BjjLevel,
+    promotionRecord?: BjjLevel[],
 }
