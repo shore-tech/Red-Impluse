@@ -1,5 +1,15 @@
 {
   "projects": {
     "default": "red-impluse"
-  }
+  },
+  "targets": {
+    "red-impluse": {
+      "hosting": {
+        "ui_business": [
+          "ui-business"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }
