@@ -23,6 +23,7 @@ export interface GridMemberRowEntry {
 }
 
 export interface MemberObj{
+    id?: string,
     firstName: string,
     lastName: string,
     email: string,
@@ -31,17 +32,25 @@ export interface MemberObj{
     dateOfBirth: string,
     join_date: string,
     mbsExpDate?: string,
-    paymentRecord?: number,
+    paymentRecord?: number|string,
     fullName?: string,
     address?: string,
-    bjjLevel?: BjjLevel,
-    class_record?: string,
+    beltColor?: string,
+    stripe?: number,
+    promotionDate?: string,
+    bjjRecord?: BjjLevelRecord,
+    // class_record?: string,
 }
 
-export interface BjjLevel{
-    beltColor: string,
+export interface BjjLevelRecord{
+    [promotionDate: string]: BjjLevelRecordEntry
+}
+
+export interface BjjLevelRecordEntry{
+    id?: string,
+    promotionDate: string,
     stripe: number,
-    promotionDate?: string,
-    promotionBy?: string,
-    promotionRecord?: BjjLevel[],
+    beltColor: string,
+    promotionBy: string,
+    isNew?: boolean,
 }

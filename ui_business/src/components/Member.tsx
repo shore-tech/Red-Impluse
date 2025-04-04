@@ -10,30 +10,34 @@ import AddIcon from '@mui/icons-material/Add';
 // local imports
 import { auth, db } from "../utils/firebaseConfig";
 import { styleMainColBox, btnBox } from "./CommonComponents";
-import { GridMemberRowEntry } from "../utils/dataInterface";
+import { MemberObj } from "../utils/dataInterface";
 import { collection, doc, onSnapshot, sum } from "firebase/firestore";
 import { CustomClaimsCtx } from "../utils/contexts";
 import MemberAdd from "./MemberAdd";
+import MemberEditBasic from "./MemberEditBasic";
+import MemberEditBjj from "./MemberEditBjj";
 
 
 export default function Member() {
     const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined)
     const [isLoading, setIsLoading] = useState<boolean>(true)
     const [openAddMember, setOpenAddMember] = useState<boolean>(false)
-    const [selectedRow, setSelectedRow] = useState<GridMemberRowEntry | undefined>(undefined)
+    const [selectedRow, setSelectedRow] = useState<MemberObj | undefined>(undefined)
+    const [openMemberEditBasic, setOpenMemberEditBasic] = useState<boolean>(false)
+    const [openMemberEditBjj , setOpenMemberEditBjj] = useState<boolean>(false)
 
 
-    const [tableRows, setTableRows] = useState<GridMemberRowEntry[]>([])
+    const [tableRows, setTableRows] = useState<MemberObj[]>([])
     const tableCol: GridColDef[] = [
         { field: 'id', headerName: 'ID', type: 'string', minWidth: 60 },
-        { field: 'name', headerName: '姓名', type: 'string', minWidth: 120 },
-        { field: 'gender', headerName: '性別', type: 'string', minWidth: 120, headerAlign: 'center', align: 'center' },
-        { field: 'dateOfBirth', headerName: '生日', type: 'string', minWidth: 120, headerAlign: 'center', align: 'center' },
-        { field: 'mobile', headerName: '電話', type: 'string', minWidth: 120 },
+        { field: 'fullName', headerName: '姓名', type: 'string', minWidth: 120 },
+        { field: 'mbsExpDate', headerName: '會藉到期日', type: 'string', minWidth: 120 },
         { field: 'beltColor', headerName: 'BJJ顏色', type: 'string', minWidth: 120 },
         { field: 'stripe', headerName: '段數', type: 'number', minWidth: 120, headerAlign: 'center', align: 'center' },
         { field: 'promotionDate', headerName: '晉升日期', type: 'string', minWidth: 120 },
-        { field: 'mbsExpDate', headerName: '會藉到期日', type: 'string', minWidth: 120 },
+        { field: 'gender', headerName: '性別', type: 'string', minWidth: 120, headerAlign: 'center', align: 'center' },
+        { field: 'dateOfBirth', headerName: '生日', type: 'string', minWidth: 120, headerAlign: 'center', align: 'center' },
+        { field: 'mobile', headerName: '電話', type: 'string', minWidth: 120 },
     ]
 
     const userClaimCtx = useContext(CustomClaimsCtx);
@@ -56,20 +60,19 @@ export default function Member() {
             // const data_sum = snapshot.data()
             console.log(snapshot.data());
             if (snapshot.exists()) {
-                const rowEntries: GridMemberRowEntry[] = []
+                const rowEntries: MemberObj[] = []
                 for (const [mbs_id, mbs_data] of Object.entries(snapshot.data())) {
                     rowEntries.push({
+                        ...mbs_data,
                         id: mbs_id,
-                        name: mbs_data.name ?? '',
-                        gender: mbs_data.gender ?? '',
-                        dateOfBirth: mbs_data.dateOfBirth ?? '',
-                        mobile: mbs_data.mobile ?? '',
-                        beltColor: mbs_data.beltColor ?? '',
-                        stripe: mbs_data.stripe ?? 0,
-                        promotionDate: mbs_data.promotionDate ?? '',
-                        mbsExpDate: mbs_data.mbsExpDate,
                     })
                 }
+                // sort rows by id
+                rowEntries.sort((a, b) => {
+                    if (a.id! < b.id!) return -1
+                    if (a.id! > b.id!) return 1
+                    return 0
+                })
                 setTableRows(rowEntries)
             }
             setIsLoading(false)
@@ -98,14 +101,23 @@ export default function Member() {
                     loading={isLoading}
                     rows={tableRows}
                     columns={tableCol}
-                    onRowDoubleClick={(row) => {
-                        console.log(`double clicked on ${row.row.id}`);
+                    onCellDoubleClick={(cell) => {
+                        console.log(`double clicked on ${cell.field}`);
+                        console.log(`double clicked on ${cell.row.id}`);
+                        setSelectedRow(cell.row)
+                        if (cell.field === 'beltColor' || cell.field === 'stripe' || cell.field === 'promotionDate') {
+                            console.log(`double clicked on ${cell.field} ${cell.value}`);
+                            setOpenMemberEditBjj(true)
+                        } else {
+                            setOpenMemberEditBasic(true)
+                        }
                     }}
                 />
             </Box>
 
             {userClaimCtx && userClaimCtx.roleLevel >= 3 && <MemberAdd open={openAddMember} onClose={() => setOpenAddMember(false)} />}
-
+            {userClaimCtx && userClaimCtx.roleLevel >= 3 && selectedRow && <MemberEditBasic open={openMemberEditBasic} onClose={() => { setOpenMemberEditBasic(false); setSelectedRow(undefined) }} selectedRow={selectedRow} />}
+            {userClaimCtx && userClaimCtx.roleLevel >= 3 && selectedRow && <MemberEditBjj open={openMemberEditBjj} onClose={() => { setOpenMemberEditBjj(false); setSelectedRow(undefined) }} selectedRow={selectedRow} />}
         </Container>
     );
 }

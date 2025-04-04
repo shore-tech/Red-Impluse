@@ -11,32 +11,28 @@ import dayjs from "dayjs";
 
 // local imports
 import { btnBox, MessageBox, styleFormHeadBox, styleModalBox } from "./CommonComponents";
-import { CustomClaimsCtx } from "../utils/contexts";
 import { MemberObj } from "../utils/dataInterface";
 import { db } from "../utils/firebaseConfig";
+import { EditOff } from "@mui/icons-material";
 
 
-export default function MemberAdd(props: { open: boolean, onClose: () => void }) {
+export default function MemberEditBasic(props: { open: boolean, onClose: () => void, selectedRow: MemberObj }) {
     const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined)
     const [successMessage, setSuccessMessage] = useState<string | undefined>(undefined)
 
-    const [firstName, setFirstName] = useState<string>('')
-    const [lastName, setLastName] = useState<string>('')
-    const [email, setEmail] = useState<string>('')
-    const [mobile, setMobile] = useState<string>('')
-    const [gender, setGender] = useState<string>('M')
-    const [dateOfBirth, setDateOfBirth] = useState<string>('')
-    const [beltColor, setBeltColor] = useState<string>('White')
-    const [stripe, setStripe] = useState<number>(0)
-    const [joinDate, setJoinDate] = useState<string>('')
-    // const [mbsExpDate, setMbsExpDate] = useState<string>('')
-    const [address, setAddress] = useState<string>('')
-    const [promotionDate, setPromotionDate] = useState<string>('')
-    const [promotionBy, setPromotionBy] = useState<string>('')
+    const [firstName, setFirstName] = useState<string>(props.selectedRow.firstName)
+    const [lastName, setLastName] = useState<string>(props.selectedRow.lastName)
+    const [email, setEmail] = useState<string>(props.selectedRow.email)
+    const [mobile, setMobile] = useState<string>(props.selectedRow.mobile)
+    const [gender, setGender] = useState<string>(props.selectedRow.gender)
+    const [dateOfBirth, setDateOfBirth] = useState<string>(props.selectedRow.dateOfBirth)
+    const [joinDate, setJoinDate] = useState<string>(props.selectedRow.join_date || '')
+    const [address, setAddress] = useState<string>(props.selectedRow.address || '')
 
-    const addNewMember = () => {
-        // set post request to firebase to add new member
-        const newMember: MemberObj = {
+
+    const editMember = () => {
+        const editedInfo: MemberObj = {
+            ...props.selectedRow,
             firstName: firstName,
             lastName: lastName,
             fullName: `${firstName} ${lastName}`,
@@ -47,45 +43,31 @@ export default function MemberAdd(props: { open: boolean, onClose: () => void })
             join_date: joinDate,
             // mbsExpDate: mbsExpDate,
             address: address,
-            beltColor: beltColor,
-            stripe: stripe,
         }
         const summaryDocRef = doc(db, '/member_list/summary')
-        // calaulate the new member id
-        let newMemberId = ''
-        let summaryDocData = {}
-        getDoc(summaryDocRef).then(doc => {
-            if (doc.exists()) {
-                summaryDocData = doc.data()
-                let member_list: string[] | number[] = Object.keys(summaryDocData)
-                member_list = member_list.map((id) => parseInt(id.split('_')[1]))
-                newMemberId = `ri_${('0000' + (Math.max(...member_list) + 1)).slice(-4)}`
-            } else {
-                newMemberId = 'ri_0001'
-            }
-            console.log('adding new member: ', newMemberId);
+        const memberDocRef = doc(db, `/member_list/${props.selectedRow.id}`)
+        updateDoc(summaryDocRef, { [editedInfo.id!]: editedInfo }).then(() => {
+            setSuccessMessage(`Member ${editedInfo.id!} updated to summary.`)
         }).then(() => {
-            // update the summary doc
-            updateDoc(summaryDocRef, { [newMemberId]: newMember }).then(() => {
-                setSuccessMessage(`New member ${newMemberId} added successfully.`)
-            }).then(() => {
-                // add new member doc
-                setDoc(doc(db, `/member_list/${newMemberId}`), newMember).then(() => {
-                    setSuccessMessage(`New member ${newMemberId} added successfully.`);
-                })
+            // add new member doc
+            updateDoc(doc(db, `/member_list/${editedInfo.id!}`), {...editedInfo}).then(() => {
+                setSuccessMessage(`Member ${editedInfo.id} updated successfully.`);
             })
         }).catch(err => {
             setErrorMessage(err.message)
         })
     }
 
+    // debugger;
+
     return (
         <Modal open={props.open} onClose={props.onClose}>
+
             <Box sx={styleModalBox}>
                 <Box sx={styleFormHeadBox}>
                     <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}> <PersonAddIcon /> </Avatar>
                     <Typography variant="h5">
-                        Add New Member
+                        Edit Member
                     </Typography>
                 </Box>
                 <Grid container spacing={2}>
@@ -156,45 +138,6 @@ export default function MemberAdd(props: { open: boolean, onClose: () => void })
                             }}
                         />
                     </Grid>
-                    <Grid item xs={12} sm={6}>
-                        <FormControl fullWidth>
-                            <InputLabel>BJJ belt color</InputLabel>
-                            <Select
-                                sx={{ width: '100%' }}
-                                name='beltColor'
-                                label='BJJ Belt Color'
-                                value={beltColor}
-                                onChange={(e) => setBeltColor(e.target.value as string)}
-                            >
-                                <MenuItem value={'White'}> 白帶 </MenuItem>
-                                <MenuItem value={'Blue'}> 藍帶 </MenuItem>
-                                <MenuItem value={'Purple'}> 紫帶 </MenuItem>
-                                <MenuItem value={'Brown'}> 啡帶 </MenuItem>
-                                <MenuItem value={'Black'}> 黑帶 </MenuItem>
-                                <MenuItem value={'Red'}> 紅帶 </MenuItem>
-                            </Select>
-                        </FormControl>
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                        <FormControl fullWidth>
-                            <InputLabel>Stripe 段數</InputLabel>
-                            <Select
-                                sx={{ width: '100%' }}
-                                name='stripe'
-                                label='Stripe 段數'
-                                value={stripe}
-                                onChange={(e) => setStripe(e.target.value as number)}
-                            >
-                                <MenuItem value={0}> 0 </MenuItem>
-                                <MenuItem value={1}> 1 </MenuItem>
-                                <MenuItem value={2}> 2 </MenuItem>
-                                <MenuItem value={3}> 3 </MenuItem>
-                                <MenuItem value={4}> 4 </MenuItem>
-                                <MenuItem value={5}> 5 (你確定？) </MenuItem>
-                            </Select>
-                        </FormControl>
-                    </Grid>
-
 
                     <Grid item xs={12}>
                         <TextField
@@ -222,7 +165,7 @@ export default function MemberAdd(props: { open: boolean, onClose: () => void })
                         />
                     </Grid>
                     <Box sx={btnBox}>
-                        <Button variant="contained" onClick={addNewMember}>新增</Button>
+                        <Button variant="contained" onClick={editMember}>修改</Button>
                         <Button variant="contained" onClick={props.onClose}>取消</Button>
                     </Box>
                 </Grid>
