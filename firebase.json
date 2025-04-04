@@ -18,7 +18,7 @@
   "hosting": [
     {
       "target": "ui_business",
-      "public": "ui_business/public",
+      "public": "ui_business/build",
       "ignore": [
         "firebase.json",
         "**/.*",
