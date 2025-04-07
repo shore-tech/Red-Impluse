@@ -8,7 +8,7 @@ export interface CustomClaims {
 
 
 
-// **************** Customer ****************
+// **************** Member ****************
 export interface GridMemberRowEntry {
     id: string,
     name: string,
@@ -54,3 +54,25 @@ export interface BjjLevelRecordEntry{
     promotionBy: string,
     isNew?: boolean,
 }
+
+// **************** class ****************
+export interface ClassContent{
+    time: string,
+    duration?: number,
+    classType: string,
+    instructor: string,
+    maxAttendees: number,
+    attendees: {[key:string]: string},
+}
+// example
+// pm_0200:{
+//     time: '14:00',
+//     duration: 60,
+//     classType: 'BJJ',
+//     instructor: 'Daniel',
+//     maxAttendees: 15,
+//     attendees: {
+//         ri_0001: 'donald',
+//         ri_0002: 'john',
+//     }
+// }

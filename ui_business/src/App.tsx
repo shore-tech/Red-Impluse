@@ -21,6 +21,7 @@ import Member from './components/Member';
 import { auth } from './utils/firebaseConfig';
 import { CustomClaims } from './utils/dataInterface';
 import { CustomClaimsCtx } from './utils/contexts';
+import ClassSchedule from './components/ClassSchedule';
 
 // date time
 import dayjs, { Dayjs } from 'dayjs';
@@ -55,7 +56,7 @@ export default function App() {
                 </ListItem>
             </List>
             <List>
-                <ListItemButton >
+                <ListItemButton onClick={() => setView(<ClassSchedule />)}>
                     <ListItemIcon> <EventAvailableIcon /> </ListItemIcon>
                     <ListItemText primary="課堂時間表" />
                 </ListItemButton>
@@ -99,7 +100,7 @@ export default function App() {
                     }
                     console.log(cunstomClaims);
                     setUserClaims(cunstomClaims);
-                    setView(<Dummy />);
+                    setView(<ClassSchedule/>);
                     console.log(auth.currentUser?.email);
                 })
             } else {

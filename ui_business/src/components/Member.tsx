@@ -8,7 +8,7 @@ import ContactsIcon from '@mui/icons-material/Contacts';
 import AddIcon from '@mui/icons-material/Add';
 
 // local imports
-import { auth, db } from "../utils/firebaseConfig";
+import { db } from "../utils/firebaseConfig";
 import { styleMainColBox, btnBox } from "./CommonComponents";
 import { MemberObj } from "../utils/dataInterface";
 import { collection, doc, onSnapshot, sum } from "firebase/firestore";

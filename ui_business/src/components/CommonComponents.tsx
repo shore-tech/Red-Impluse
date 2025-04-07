@@ -1,5 +1,5 @@
 import { Margin } from "@mui/icons-material";
-import { Alert, AlertColor, Box, Button, Modal, Typography } from "@mui/material";
+import { Alert, AlertColor, Box, Button, CircularProgress, Modal, Typography } from "@mui/material";
 import Link from '@mui/material/Link';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 
@@ -48,13 +48,28 @@ export const styleFormHeadBox = {
 
 }
 
-export const styleMainColBox = { 
-    marginTop: 4, 
-    display: 'flex', 
-    flexDirection: 'column', 
-    alignItems: 'center', 
+export const styleMainColBox = {
+    marginTop: 4,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
 }
 
+export function LoadingBox(props: { open: boolean, onClose: () => void }) {
+    return (
+        <Modal open={props.open} onClose={props.onClose}>
+            <Box sx={{
+                position: 'absolute' as 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                bgcolor: 'transparent',
+            }}>
+                <CircularProgress size={'6rem'} />
+            </Box>
+        </Modal>
+    )
+}
 
 export function MessageBox(props: { open: boolean, onClose: () => void, type: string, message: string }) {
     let bgColor: string = 'transparent'

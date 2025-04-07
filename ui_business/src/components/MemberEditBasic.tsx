@@ -62,7 +62,6 @@ export default function MemberEditBasic(props: { open: boolean, onClose: () => v
 
     return (
         <Modal open={props.open} onClose={props.onClose}>
-
             <Box sx={styleModalBox}>
                 <Box sx={styleFormHeadBox}>
                     <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}> <PersonAddIcon /> </Avatar>
