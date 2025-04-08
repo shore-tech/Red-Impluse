@@ -9,7 +9,7 @@ import { DesktopTimePicker } from "@mui/x-date-pickers";
 
 // local imports
 import { LoadingBox, MessageBox, styleFormHeadBox, styleModalBox } from "./CommonComponents";
-import { ClassContent } from "../utils/dataInterface";
+import { ClassContent, DailyTmpCnt } from "../utils/dataInterface";
 import { db } from "../utils/firebaseConfig";
 
 
@@ -23,18 +23,17 @@ dayjs.extend(timezone);
 dayjs.tz.setDefault("Asia/Hong_Kong");
 
 
-// classDate comes in format of YYYY-MM-DD
-// classWholeDateList may comes with empty object {}
+// classDay comes in format of YYYY-MM-DD
+// wholeDayTmp may comes with empty object {}
 // classKey comes in format of 'am_HHmm' or 'pm_HHmm' or 'new' => 'new' means new class
-export default function ClassAdd(props: { open: boolean, onClose: () => void, classDate: string, classWholeDateList: { [classId: string]: ClassContent } }) {
+export default function ClassSchTmpAdd(props: { open: boolean, onClose: () => void, weekDay: string, wholeDayTmp: DailyTmpCnt }) {
     const [infoMessage, setInfoMessage] = useState<string | undefined>(undefined)
     const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined)
     const [successMessage, setSuccessMessage] = useState<string | undefined>(undefined)
     const [isLoading, setIsLoading] = useState<boolean>(false)
 
-    const [classDate, setClassDate] = useState<string>(props.classDate)
-    const [classFullList, setClassFullList] = useState<{ [classId: string]: ClassContent }>(props.classWholeDateList)
-
+    const [classDay, setClassDay] = useState<string>(props.weekDay)
+    const [classFullList, setClassFullList] = useState<{ [classId: string]: ClassContent }>(props.wholeDayTmp)
 
     const [classTime, setClassTime] = useState<string>(dayjs().format('HH:mm'))
     const [classDuration, setClassDuration] = useState<number>(60)
@@ -46,32 +45,27 @@ export default function ClassAdd(props: { open: boolean, onClose: () => void, cl
     const handleAddClass = () => {
         setIsLoading(true)
         let classFieldId: string = dayjs(classTime, 'HH:mm').format('a_HHmm')
-        const updatedClassContent: ClassContent = {
-            time: classTime,
-            duration: classDuration,
-            classType: classType,
-            instructor: classInstructor,
-            maxAttendees: maxAttendees,
-            attendees: attendees
-        }
         if (classFieldId in classFullList) {
-            setErrorMessage(`Class ${classDate}, ${classTime} already exists!`)
+            setErrorMessage(`Class ${classDay}, ${classTime} already exists!`)
+            return
         }
-        if (Object.keys(classFullList).length === 0) {
-            // set doc directly
-            setDoc(doc(db, `/class_list/${classDate}`), { [classFieldId]: updatedClassContent }).then(() => {
-                setSuccessMessage(`Class ${classDate}, ${classTime} added successfully!`)
-            }).catch((err) => {
-                setErrorMessage(`Failed to add class ${classDate}, ${classTime}!`)
-            })
-        } else {
-            // update doc
-            updateDoc(doc(db, `/class_list/${classDate}`), { [classFieldId]: updatedClassContent }).then(() => {
-                setSuccessMessage(`Class ${classDate}, ${classTime} added successfully!`)
-            }).catch((err) => {
-                setErrorMessage(`Failed to add class ${classDate}, ${classTime}!`)
-            })
+        const updatedWholeDayTmp: { [classId: string]: ClassContent } = {
+            ...classFullList,
+            [classFieldId]: {
+                time: classTime,
+                duration: classDuration,
+                classType: classType,
+                instructor: classInstructor,
+                maxAttendees: maxAttendees,
+                attendees: attendees
+            }
         }
+        const tmpDocRef = doc(db, `/class_list/template`)
+        updateDoc(tmpDocRef, { [classDay]: updatedWholeDayTmp }).then(() => {
+            setSuccessMessage(`Class ${classDay}, ${classTime} added successfully!`)
+        }).catch((err) => {
+            setErrorMessage(`Failed to add class ${classDay}, ${classTime}!`)
+        })
     }
 
     const handleCloseAndClear = () => {
@@ -81,13 +75,12 @@ export default function ClassAdd(props: { open: boolean, onClose: () => void, cl
     }
 
     useEffect(() => {
-        setClassDate(props.classDate)
-        setClassFullList(props.classWholeDateList)
-        for (const [key, value] of Object.entries(props.classWholeDateList)) {
+        setClassDay(props.weekDay)
+        setClassFullList(props.wholeDayTmp)
+        for (const [key, value] of Object.entries(props.wholeDayTmp)) {
             console.log(key, value);
-
         }
-    }, [props.classDate, props.classWholeDateList])
+    }, [props.weekDay, props.wholeDayTmp])
 
     return (
         <Modal open={props.open} onClose={handleCloseAndClear}>
@@ -103,7 +96,7 @@ export default function ClassAdd(props: { open: boolean, onClose: () => void, cl
                         <TextField
                             fullWidth
                             label='Class Date 課堂日期'
-                            value={classDate}
+                            value={classDay}
                             disabled
                         />
                     </Grid>

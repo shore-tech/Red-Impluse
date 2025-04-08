@@ -66,7 +66,6 @@ export default function ClassSchedule() {
                 <Button size='medium' variant="outlined" onClick={()=>resetWeekDays()}> Current </Button>
                 <Button size="medium" endIcon={<SkipNextOutlinedIcon />} onClick={() => handleWeekChange(1)}>Next</Button>
             </Box>
-            {/* {daysOfWeek && <ClassDayTB date={daysOfWeek[0]} />} */}
             {daysOfWeek && daysOfWeek.map((day) => (
                 <ClassDayTB key={day} date={day} />
             ))}

@@ -16,12 +16,12 @@ import ReceiptIcon from '@mui/icons-material/Receipt';
 
 // local components
 import AuthLogin from './components/AuthLogin';
-import Dummy from './components/dummy';
 import Member from './components/Member';
+import ClassSchedule from './components/ClassSchedule';
+import ClassSchTmp from './components/ClassSchTmp';
 import { auth } from './utils/firebaseConfig';
 import { CustomClaims } from './utils/dataInterface';
 import { CustomClaimsCtx } from './utils/contexts';
-import ClassSchedule from './components/ClassSchedule';
 
 // date time
 import dayjs, { Dayjs } from 'dayjs';
@@ -60,14 +60,23 @@ export default function App() {
                     <ListItemIcon> <EventAvailableIcon /> </ListItemIcon>
                     <ListItemText primary="課堂時間表" />
                 </ListItemButton>
+
                 <ListItemButton onClick={() => setView(<Member />)}>
                     <ListItemIcon> <AccountBoxIcon /> </ListItemIcon>
                     <ListItemText primary="會員管理" />
                 </ListItemButton>
+
                 <ListItemButton>
                     <ListItemIcon> <ReceiptIcon /> </ListItemIcon>
                     <ListItemText primary="報表" />
                 </ListItemButton>
+
+                <Divider />
+                <ListItemButton onClick={() => setView(<ClassSchTmp />)}>
+                    <ListItemIcon > <ReceiptIcon /> </ListItemIcon>
+                    <ListItemText primary="時間表模組" />
+                </ListItemButton>
+
                 <Divider />
                 <ListItemButton onClick={() => handleLogOut()}>
                     <ListItemIcon> <Logout /> </ListItemIcon>
@@ -99,7 +108,7 @@ export default function App() {
                         createdBy: idTokenResult.claims.createdBy as string,
                     }
                     setUserClaims(cunstomClaims);
-                    setView(<ClassSchedule/>);
+                    setView(<ClassSchTmp />);
                 })
             } else {
                 setDrawerWidth(0);
