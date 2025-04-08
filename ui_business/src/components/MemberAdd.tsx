@@ -10,15 +10,17 @@ import { MuiTelInput } from "mui-tel-input";
 import dayjs from "dayjs";
 
 // local imports
-import { btnBox, MessageBox, styleFormHeadBox, styleModalBox } from "./CommonComponents";
+import { btnBox, LoadingBox, MessageBox, styleFormHeadBox, styleModalBox } from "./CommonComponents";
 import { CustomClaimsCtx } from "../utils/contexts";
 import { MemberObj } from "../utils/dataInterface";
 import { db } from "../utils/firebaseConfig";
 
 
 export default function MemberAdd(props: { open: boolean, onClose: () => void }) {
+    const [infoMessage, setInfoMessage] = useState<string | undefined>(undefined)
     const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined)
     const [successMessage, setSuccessMessage] = useState<string | undefined>(undefined)
+    const [isLoading, setIsLoading] = useState<boolean>(false)
 
     const [firstName, setFirstName] = useState<string>('')
     const [lastName, setLastName] = useState<string>('')
@@ -31,8 +33,7 @@ export default function MemberAdd(props: { open: boolean, onClose: () => void })
     const [joinDate, setJoinDate] = useState<string>('')
     // const [mbsExpDate, setMbsExpDate] = useState<string>('')
     const [address, setAddress] = useState<string>('')
-    const [promotionDate, setPromotionDate] = useState<string>('')
-    const [promotionBy, setPromotionBy] = useState<string>('')
+
 
     const addNewMember = () => {
         // set post request to firebase to add new member
@@ -54,6 +55,7 @@ export default function MemberAdd(props: { open: boolean, onClose: () => void })
         // calaulate the new member id
         let newMemberId = ''
         let summaryDocData = {}
+        setIsLoading(true)
         getDoc(summaryDocRef).then(doc => {
             if (doc.exists()) {
                 summaryDocData = doc.data()
@@ -67,16 +69,23 @@ export default function MemberAdd(props: { open: boolean, onClose: () => void })
         }).then(() => {
             // update the summary doc
             updateDoc(summaryDocRef, { [newMemberId]: newMember }).then(() => {
-                setSuccessMessage(`New member ${newMemberId} added successfully.`)
+                console.log(`New member ${newMemberId} added successfully.`)
             }).then(() => {
                 // add new member doc
                 setDoc(doc(db, `/member_list/${newMemberId}`), newMember).then(() => {
+                    setIsLoading(false)
                     setSuccessMessage(`New member ${newMemberId} added successfully.`);
                 })
             })
         }).catch(err => {
+            setIsLoading(false)
             setErrorMessage(err.message)
         })
+    }
+
+    const handleCloseAndClear = () => {
+        setSuccessMessage(undefined)
+        props.onClose()
     }
 
     return (
@@ -226,10 +235,14 @@ export default function MemberAdd(props: { open: boolean, onClose: () => void })
                         <Button variant="contained" onClick={props.onClose}>取消</Button>
                     </Box>
                 </Grid>
-
-
+                {isLoading && <LoadingBox open={isLoading} onClose={() => setIsLoading(false)} />}
+                {infoMessage && <MessageBox open={infoMessage ? true : false} onClose={() => setInfoMessage(undefined)} type='info' message={infoMessage} />}
                 {errorMessage && <MessageBox open={errorMessage ? true : false} onClose={() => setErrorMessage(undefined)} type='error' message={errorMessage} />}
-                {successMessage && <MessageBox open={successMessage ? true : false} onClose={props.onClose} type='success' message={successMessage} />}
+                {successMessage && <MessageBox open={successMessage ? true : false} onClose={() => handleCloseAndClear()} type='success' message={successMessage} />}
+
+
+                {/* {errorMessage && <MessageBox open={errorMessage ? true : false} onClose={() => setErrorMessage(undefined)} type='error' message={errorMessage} />}
+                {successMessage && <MessageBox open={successMessage ? true : false} onClose={props.onClose} type='success' message={successMessage} />} */}
 
             </Box>
         </Modal>

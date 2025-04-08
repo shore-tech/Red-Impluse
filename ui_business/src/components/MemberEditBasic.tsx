@@ -10,15 +10,17 @@ import { MuiTelInput } from "mui-tel-input";
 import dayjs from "dayjs";
 
 // local imports
-import { btnBox, MessageBox, styleFormHeadBox, styleModalBox } from "./CommonComponents";
+import { btnBox, LoadingBox, MessageBox, styleFormHeadBox, styleModalBox } from "./CommonComponents";
 import { MemberObj } from "../utils/dataInterface";
 import { db } from "../utils/firebaseConfig";
 import { EditOff } from "@mui/icons-material";
 
 
 export default function MemberEditBasic(props: { open: boolean, onClose: () => void, selectedRow: MemberObj }) {
+    const [infoMessage, setInfoMessage] = useState<string | undefined>(undefined)
     const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined)
     const [successMessage, setSuccessMessage] = useState<string | undefined>(undefined)
+    const [isLoading, setIsLoading] = useState<boolean>(false)
 
     const [firstName, setFirstName] = useState<string>(props.selectedRow.firstName)
     const [lastName, setLastName] = useState<string>(props.selectedRow.lastName)
@@ -50,7 +52,7 @@ export default function MemberEditBasic(props: { open: boolean, onClose: () => v
             setSuccessMessage(`Member ${editedInfo.id!} updated to summary.`)
         }).then(() => {
             // add new member doc
-            updateDoc(doc(db, `/member_list/${editedInfo.id!}`), {...editedInfo}).then(() => {
+            updateDoc(doc(db, `/member_list/${editedInfo.id!}`), { ...editedInfo }).then(() => {
                 setSuccessMessage(`Member ${editedInfo.id} updated successfully.`);
             })
         }).catch(err => {
@@ -58,7 +60,10 @@ export default function MemberEditBasic(props: { open: boolean, onClose: () => v
         })
     }
 
-    // debugger;
+    const handleCloseAndClear = () => {
+        setSuccessMessage(undefined)
+        props.onClose()
+    }
 
     return (
         <Modal open={props.open} onClose={props.onClose}>
@@ -170,8 +175,12 @@ export default function MemberEditBasic(props: { open: boolean, onClose: () => v
                 </Grid>
 
 
+                {/* {errorMessage && <MessageBox open={errorMessage ? true : false} onClose={() => setErrorMessage(undefined)} type='error' message={errorMessage} />}
+                {successMessage && <MessageBox open={successMessage ? true : false} onClose={props.onClose} type='success' message={successMessage} />} */}
+                {isLoading && <LoadingBox open={isLoading} onClose={() => setIsLoading(false)} />}
+                {infoMessage && <MessageBox open={infoMessage ? true : false} onClose={() => setInfoMessage(undefined)} type='info' message={infoMessage} />}
                 {errorMessage && <MessageBox open={errorMessage ? true : false} onClose={() => setErrorMessage(undefined)} type='error' message={errorMessage} />}
-                {successMessage && <MessageBox open={successMessage ? true : false} onClose={props.onClose} type='success' message={successMessage} />}
+                {successMessage && <MessageBox open={successMessage ? true : false} onClose={() => handleCloseAndClear()} type='success' message={successMessage} />}
 
             </Box>
         </Modal>
