@@ -1,5 +1,5 @@
 // react component for member page
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 // third party imports
 import { doc, setDoc, updateDoc } from "firebase/firestore";

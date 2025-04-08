@@ -10,9 +10,7 @@ import SkipNextOutlinedIcon from '@mui/icons-material/SkipNextOutlined';
 
 
 // local imports
-import { auth, db } from "../utils/firebaseConfig";
 import { styleMainColBox, btnBox } from "./CommonComponents";
-import { CustomClaimsCtx } from "../utils/contexts";
 import ClassDayTB from "./ClassDayTB";
 
 

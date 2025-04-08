@@ -1,9 +1,9 @@
 // react component for member page
-import { JSX, use, useEffect, useState } from "react";
+import { JSX, useEffect, useState } from "react";
 
 // third party imports
 import { Box, Button, Container, Typography } from "@mui/material";
-import { doc, getDoc, onSnapshot } from "firebase/firestore";
+import { doc, onSnapshot } from "firebase/firestore";
 import dayjs from "dayjs";
 
 // local imports
