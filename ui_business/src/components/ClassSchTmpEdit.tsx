@@ -26,7 +26,9 @@ dayjs.tz.setDefault("Asia/Hong_Kong");
 // classDay comes in format of YYYY-MM-DD
 // wholeDayTmp may comes with empty object {}
 // classKey comes in format of 'am_HHmm' or 'pm_HHmm' or 'new' => 'new' means new class
-export default function ClassSchTmpAdd(props: { open: boolean, onClose: () => void, weekDay: string, wholeDayTmp: DailyTmpCnt }) {
+export default function ClassSchTmpEdit(props: { open: boolean, onClose: () => void, weekDay: string, wholeDayTmp: DailyTmpCnt, tmpKey: string }) {
+    const tmpDocRef = doc(db, `/class_list/template`)
+
     const [infoMessage, setInfoMessage] = useState<string | undefined>(undefined)
     const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined)
     const [successMessage, setSuccessMessage] = useState<string | undefined>(undefined)
@@ -34,6 +36,7 @@ export default function ClassSchTmpAdd(props: { open: boolean, onClose: () => vo
 
     const [classDay, setClassDay] = useState<string>(props.weekDay)
     const [classFullList, setClassFullList] = useState<{ [classId: string]: ClassContent }>(props.wholeDayTmp)
+    const [tmpKey , setTmpKey] = useState<string>(props.tmpKey)
 
     const [classTime, setClassTime] = useState<string>(dayjs().format('HH:mm'))
     const [classDuration, setClassDuration] = useState<number>(60)
@@ -42,13 +45,11 @@ export default function ClassSchTmpAdd(props: { open: boolean, onClose: () => vo
     const [maxAttendees, setMaxAttendees] = useState<number>(15)
     const [attendees, setAttendees] = useState<{ [key: string]: string }>({})
 
-    const handleAddClass = () => {
+    const [showCfmDel, setShowCfmDel] = useState<boolean>(false)
+
+    const handleEditTmp = () => {
         setIsLoading(true)
         let classFieldId: string = dayjs(classTime, 'HH:mm').format('a_HHmm')
-        if (classFieldId in classFullList) {
-            setErrorMessage(`Class ${classDay}, ${classTime} already exists!`)
-            return
-        }
         const updatedWholeDayTmp: { [classId: string]: ClassContent } = {
             ...classFullList,
             [classFieldId]: {
@@ -60,11 +61,23 @@ export default function ClassSchTmpAdd(props: { open: boolean, onClose: () => vo
                 attendees: attendees
             }
         }
-        const tmpDocRef = doc(db, `/class_list/template`)
         updateDoc(tmpDocRef, { [classDay]: updatedWholeDayTmp }).then(() => {
             setSuccessMessage(`Class ${classDay}, ${classTime} added successfully!`)
         }).catch((err) => {
             setErrorMessage(`Failed to add class ${classDay}, ${classTime}!`)
+        })
+    }
+
+    const handleDeleteTmp = () => {
+        setIsLoading(true)
+        let updatedWholeDayTmp: { [classId: string]: ClassContent } = { ...classFullList }
+        console.log(tmpKey);
+        delete updatedWholeDayTmp[tmpKey]
+        console.log(updatedWholeDayTmp);
+        updateDoc(tmpDocRef, { [classDay]: updatedWholeDayTmp }).then(() => {
+            setSuccessMessage(`Class ${classDay}, ${classTime} deleted successfully!`)
+        }).catch((err) => {
+            setErrorMessage(err.message)
         })
     }
 
@@ -76,11 +89,17 @@ export default function ClassSchTmpAdd(props: { open: boolean, onClose: () => vo
 
     useEffect(() => {
         setClassDay(props.weekDay)
+        setTmpKey(props.tmpKey)
         setClassFullList(props.wholeDayTmp)
-        for (const [key, value] of Object.entries(props.wholeDayTmp)) {
-            console.log(key, value);
+        if (props.tmpKey in props.wholeDayTmp) {
+            setClassTime(props.wholeDayTmp[props.tmpKey]!.time)
+            setClassDuration(props.wholeDayTmp[props.tmpKey]!.duration)
+            setClassType(props.wholeDayTmp[props.tmpKey]!.classType)
+            setClassInstructor(props.wholeDayTmp[props.tmpKey]!.instructor)
+            setMaxAttendees(props.wholeDayTmp[props.tmpKey]!.maxAttendees)
+            setAttendees(props.wholeDayTmp[props.tmpKey]!.attendees)
         }
-    }, [props.weekDay, props.wholeDayTmp])
+    }, [props.weekDay, props.wholeDayTmp, props.tmpKey])
 
     return (
         <Modal open={props.open} onClose={handleCloseAndClear}>
@@ -88,7 +107,7 @@ export default function ClassSchTmpAdd(props: { open: boolean, onClose: () => vo
                 <Box sx={styleFormHeadBox}>
                     <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}> <PersonAddIcon /> </Avatar>
                     <Typography variant="h5">
-                        Add Class
+                        Edit Class
                     </Typography>
                 </Box>
                 <Grid container spacing={2}>
@@ -102,6 +121,7 @@ export default function ClassSchTmpAdd(props: { open: boolean, onClose: () => vo
                     </Grid>
                     <Grid item xs={12} sm={6}>
                         <DesktopTimePicker
+                            disabled
                             sx={{ width: '100%' }}
                             label="Class Time 課堂時間"
                             value={dayjs(classTime, 'HH:mm')}
@@ -146,14 +166,22 @@ export default function ClassSchTmpAdd(props: { open: boolean, onClose: () => vo
                     </Grid>
                     <Grid item xs={12} sm={6} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }} >
                         {/* make btn to close the Modal */}
-                        <Button variant="contained" color="primary" onClick={handleAddClass} sx={{ width: '50%', my: 1 }}>
+                        <Button variant="contained" color="primary" onClick={handleEditTmp} sx={{ width: '50%', my: 1 }}>
                             儲存
                         </Button>
                         <Button variant="contained" color="primary" onClick={handleCloseAndClear} sx={{ width: '50%', my: 1 }}>
                             取消
                         </Button>
+                        <Button variant="contained" color="primary" onClick={() => setShowCfmDel(!showCfmDel)} sx={{ width: '50%', my: 1 }}>
+                            {showCfmDel ? '取消刪除' : '刪除課堂'}
+                        </Button>
+                        {showCfmDel && <Button variant="contained" color="primary" onClick={handleDeleteTmp} sx={{ width: '50%', my: 1 }}>
+                            確定删除!
+                        </Button>}
+
                     </Grid>
                 </Grid>
+
                 {isLoading && <LoadingBox open={isLoading} onClose={() => setIsLoading(false)} />}
                 {infoMessage && <MessageBox open={infoMessage ? true : false} onClose={() => { setIsLoading(false); setInfoMessage(undefined) }} type='info' message={infoMessage} />}
                 {errorMessage && <MessageBox open={errorMessage ? true : false} onClose={() => { setIsLoading(false); setErrorMessage(undefined) }} type='error' message={errorMessage} />}

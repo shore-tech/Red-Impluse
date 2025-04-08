@@ -58,7 +58,7 @@ export interface BjjLevelRecordEntry{
 // **************** class ****************
 export interface ClassContent{
     time: string,
-    duration?: number,
+    duration: number,
     classType: string,
     instructor: string,
     maxAttendees: number,

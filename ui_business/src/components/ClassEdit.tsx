@@ -26,7 +26,7 @@ dayjs.tz.setDefault("Asia/Hong_Kong");
 
 // classDate comes in format of YYYY-MM-DD
 // classKey comes in format of 'am_HHmm' or 'pm_HHmm' or 'new' => 'new' means new class
-export default function ClassEdit(props: { open: boolean, onClose: () => void, classDate: string, classWholeDateList: { [classId: string]: ClassContent }, classKey: string}) {
+export default function ClassEdit(props: { open: boolean, onClose: () => void, classDate: string, classWholeDateList: { [classId: string]: ClassContent }, classKey: string }) {
     const [infoMessage, setInfoMessage] = useState<string | undefined>(undefined)
     const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined)
     const [successMessage, setSuccessMessage] = useState<string | undefined>(undefined)
@@ -325,9 +325,9 @@ export default function ClassEdit(props: { open: boolean, onClose: () => void, c
                         <Button variant="contained" color="primary" onClick={handleCloseAndClear} sx={{ width: '50%', my: 1 }}>
                             取消
                         </Button>
-                        {props.classKey !== 'new' && <Button variant="contained" color="primary" onClick={() => setShowCfmDel(!showCfmDel)} sx={{ width: '50%', my: 1 }}>
+                        <Button variant="contained" color="primary" onClick={() => setShowCfmDel(!showCfmDel)} sx={{ width: '50%', my: 1 }}>
                             {showCfmDel ? '取消刪除' : '刪除課堂'}
-                        </Button>}
+                        </Button>
                         {showCfmDel && <Button variant="contained" color="primary" onClick={handleDelClass} sx={{ width: '50%', my: 1 }}>
                             確定删除!
                         </Button>}

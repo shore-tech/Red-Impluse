@@ -13,6 +13,7 @@ import { ClassContent } from "../utils/dataInterface";
 import { DailyTmpCnt } from "../utils/dataInterface";
 import ClassSchTmpAdd from "./ClassSchTmpAdd";
 import { btnBox } from "./CommonComponents";
+import ClassSchTmpEdit from "./ClassSchTmpEdit";
 
 
 export default function ClassSchTmpDayCard(props: { dayKey: string, dayClassList: DailyTmpCnt }) {
@@ -24,17 +25,15 @@ export default function ClassSchTmpDayCard(props: { dayKey: string, dayClassList
 
     const [openAddTmp, setOpenAddTmp] = useState<boolean>(false)
     const [openEditTmp, setOpenEditTmp] = useState<boolean>(false)
+    const [targetTmpKey , setTargetTmpKey] = useState<string>('mon')
 
 
-    const handleAddClass = () => { }
-    const handleEditClass = (key: string) => { }
+    const handleEditTmp = (key: string) => {
+        setTargetTmpKey(key)
+        setOpenEditTmp(true)
+     }
     const handleApplyTmp = (key: string) => { }
 
-    // useEffect(() => {
-    //     console.log(props.dayKey)
-    //     console.log(amClassBtnList);
-    //     console.log(pmClassBtnList);
-    // },[amClassBtnList, pmClassBtnList])
 
     useEffect(() => {
         if (!props.dayClassList) return;
@@ -53,11 +52,9 @@ export default function ClassSchTmpDayCard(props: { dayKey: string, dayClassList
         // sort amClassBtnKeyList and amClassBtnKeyList
         const amClassBtnList = amClassBtnKeyList.map((key) => {
             const classContent = wholeDayClasses[key]
-            console.log(key);
-            console.log(classContent);
             const numberOfAttendees = Object.keys(classContent.attendees).length
             return (
-                <Button key={key} variant="contained" color="primary" sx={{ margin: 1 }} onClick={() => handleEditClass(key)}>
+                <Button key={key} variant="contained" color="primary" sx={{ margin: 1 }} onClick={() => handleEditTmp(key)}>
                     {classContent.time}/{classContent.classType}/{classContent.instructor}/{numberOfAttendees}-{classContent.maxAttendees}
                 </Button>
             )
@@ -67,7 +64,7 @@ export default function ClassSchTmpDayCard(props: { dayKey: string, dayClassList
             const classContent = wholeDayClasses[key]
             const numberOfAttendees = Object.keys(classContent.attendees).length
             return (
-                <Button key={key} variant="contained" color="primary" sx={{ margin: 1 }} onClick={() => handleEditClass(key)}>
+                <Button key={key} variant="contained" color="primary" sx={{ margin: 1 }} onClick={() => handleEditTmp(key)}>
                     {classContent.time}/{classContent.classType}/{classContent.instructor}/{numberOfAttendees}-{classContent.maxAttendees}
                 </Button>
             )
@@ -125,7 +122,7 @@ export default function ClassSchTmpDayCard(props: { dayKey: string, dayClassList
             <Box sx={{ paddingX: 2, gap: 2, display: 'flex', flexWrap: 'wrap' }}> {amClassBtnList}</Box>
             <Box sx={{ borderBottom: '1px dotted #ccc', my: 1 }} />
             <Box sx={{ paddingX: 2, gap: 2, display: 'flex', flexWrap: 'wrap' }}> {pmClassBtnList}</Box>
-
+            {openEditTmp && <ClassSchTmpEdit open={openEditTmp} onClose={() => setOpenEditTmp(false)} weekDay={props.dayKey} wholeDayTmp={wholeDayClassList} tmpKey={targetTmpKey} />}
             {openAddTmp && <ClassSchTmpAdd open={openAddTmp} onClose={() => setOpenAddTmp(false)} weekDay={props.dayKey} wholeDayTmp={props.dayClassList} />}
 
         </Container>
