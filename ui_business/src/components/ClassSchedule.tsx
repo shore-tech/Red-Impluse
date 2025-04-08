@@ -2,15 +2,16 @@
 import { use, useContext, useEffect, useState } from "react";
 
 // third party imports
-import { Avatar, Box, Button, Container, Grid, Typography } from "@mui/material";
+import { Avatar, Box, Button, Container, Grid, IconButton, Typography } from "@mui/material";
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 // import AssignmentAddIcon from '@mui/icons-material/AssignmentAdd';
+import SkipPreviousOutlinedIcon from '@mui/icons-material/SkipPreviousOutlined';
+import SkipNextOutlinedIcon from '@mui/icons-material/SkipNextOutlined';
+
 
 // local imports
 import { auth, db } from "../utils/firebaseConfig";
 import { styleMainColBox, btnBox } from "./CommonComponents";
-import { MemberObj } from "../utils/dataInterface";
-import { collection, doc, onSnapshot, sum } from "firebase/firestore";
 import { CustomClaimsCtx } from "../utils/contexts";
 import ClassDayTB from "./ClassDayTB";
 
@@ -26,13 +27,9 @@ dayjs.tz.setDefault("Asia/Hong_Kong");
 
 
 export default function ClassSchedule() {
-    const userClaimCtx = useContext(CustomClaimsCtx);
-    const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined)
-    const [isLoading, setIsLoading] = useState<boolean>(true)
-    const [openAddModule, setOpenAddModule] = useState<boolean>(false)
     const [daysOfWeek, setDaysOfWeek] = useState<string[]>([])
 
-    useEffect(() => {
+    const resetWeekDays = () => {
         // define the dates of the current week
         const startOfWeek = dayjs().startOf('week');
         const weekDays: string[] = [];
@@ -41,6 +38,19 @@ export default function ClassSchedule() {
             weekDays.push(day);
         }
         setDaysOfWeek(weekDays);
+    }
+
+    const handleWeekChange = (direction: number) => {
+        // change the week by adding or subtracting 7 days
+        const newDaysOfWeek = daysOfWeek.map(day => {
+            const newDate = dayjs(day).add(direction * 7, 'day');
+            return newDate.format('YYYY-MM-DD');
+        });
+        setDaysOfWeek(newDaysOfWeek);
+    }
+
+    useEffect(() => {
+        resetWeekDays()
     }, [])
 
 
@@ -54,11 +64,10 @@ export default function ClassSchedule() {
                     課堂時間表
                 </Typography>
             </Box>
-            {/* add button below, so that user can build modules for time table */}
-            <Box sx={btnBox}>
-                <Button variant="contained" color="primary" onClick={() => setOpenAddModule(true)}>
-                    新增模組
-                </Button>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1, width: '100%' }}>
+                <Button size="medium" startIcon={<SkipPreviousOutlinedIcon />} onClick={() => handleWeekChange(-1)}>Prev</Button>
+                <Button size='medium' variant="outlined" onClick={()=>resetWeekDays()}> Current </Button>
+                <Button size="medium" endIcon={<SkipNextOutlinedIcon />} onClick={() => handleWeekChange(1)}>Next</Button>
             </Box>
             {/* {daysOfWeek && <ClassDayTB date={daysOfWeek[0]} />} */}
             {daysOfWeek && daysOfWeek.map((day) => (
