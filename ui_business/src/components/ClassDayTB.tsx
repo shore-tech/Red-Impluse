@@ -39,10 +39,7 @@ export default function ClassDayTB(props: { date: string }) {
         const dayClassScheduleRef = doc(db, `/class_list/${classDate}`)
         const unsubscribe = onSnapshot(dayClassScheduleRef, (snapshot) => {
             const data = snapshot.data()
-            if (!data) {
-                console.log("No data found for the given date:", classDate); // Debug log
-                return;
-            }
+            if (!data) return;
             let wholeDayClasses: { [classId: string]: ClassContent } = {}
             let amClassBtnKeyList: string[] = []
             let pmClassBtnKeyList: string[] = []

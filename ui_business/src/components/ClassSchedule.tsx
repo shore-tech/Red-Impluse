@@ -4,7 +4,6 @@ import { use, useContext, useEffect, useState } from "react";
 // third party imports
 import { Avatar, Box, Button, Container, Grid, IconButton, Typography } from "@mui/material";
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
-// import AssignmentAddIcon from '@mui/icons-material/AssignmentAdd';
 import SkipPreviousOutlinedIcon from '@mui/icons-material/SkipPreviousOutlined';
 import SkipNextOutlinedIcon from '@mui/icons-material/SkipNextOutlined';
 

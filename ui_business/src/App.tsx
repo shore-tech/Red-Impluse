@@ -98,10 +98,8 @@ export default function App() {
                         roleLevel: idTokenResult.claims.roleLevel as 5 | 4 | 3 | 2 | 1,
                         createdBy: idTokenResult.claims.createdBy as string,
                     }
-                    console.log(cunstomClaims);
                     setUserClaims(cunstomClaims);
                     setView(<ClassSchedule/>);
-                    console.log(auth.currentUser?.email);
                 })
             } else {
                 setDrawerWidth(0);

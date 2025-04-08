@@ -62,7 +62,6 @@ export default function Member() {
         const customerSumRef = doc(db, '/member_list/summary')
         const unsubscribe = onSnapshot(customerSumRef, (snapshot) => {
             const data_sum = snapshot.data()
-            console.log(snapshot.data());
             const rowEntries: MemberObj[] = []
             for (const [mbs_id, mbs_data] of Object.entries(data_sum!)) {
                 rowEntries.push({
@@ -76,10 +75,10 @@ export default function Member() {
                 if (a.id! > b.id!) return 1
                 return 0
             })
-            setTableRows(rowEntries)
             setIsLoading(false)
+            setTableRows(rowEntries)
         }, (error) => {
-            console.log(error);
+            setIsLoading(false)
             setErrorMessage(error.message)
         })
 
