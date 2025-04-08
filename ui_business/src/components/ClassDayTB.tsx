@@ -10,37 +10,24 @@ import dayjs from "dayjs";
 import { db } from "../utils/firebaseConfig";
 import { ClassContent } from "../utils/dataInterface";
 import ClassEdit from "./ClassEdit";
+import ClassAdd from "./ClassAdd";
 
 
 
 export default function ClassDayTB(props: { date: string }) {
     const [classDate, setClassDate] = useState<string>(props.date)
     const [wholeDayClassList, setWholeDayClassList] = useState<{ [classId: string]: ClassContent }>({})
-    const [amClassList, setMorningClassList] = useState<{ [classId: string]: ClassContent }>({})
-    const [pmClassList, setAfternoonClassList] = useState<{ [classId: string]: ClassContent }>({})
+
     const [amClassBtn, setAmClassBtn] = useState<JSX.Element[]>([])
     const [pmClassBtn, setPmClassBtn] = useState<JSX.Element[]>([])
+
+    const [openClassAdd, setOpenClassAdd] = useState<boolean>(false)
+
     const [openEditClass, setOpenEditClass] = useState<boolean>(false)
     const [targetClassKey, setTargetClassKey] = useState<string>('new')
-    const [targetClassContent, setTargetClassContent] = useState<ClassContent | undefined>(undefined)
 
     const handleEditClass = (key: string) => {
-        console.log(key);
         setTargetClassKey(key);
-        switch (key.split('_')[0]) {
-            case 'am':
-                console.log(amClassList[key]);
-                setTargetClassContent(amClassList[key])
-                break;
-            case 'pm':
-                console.log(pmClassList[key]);
-                setTargetClassContent(pmClassList[key])
-                break;
-            default:
-                setTargetClassContent(undefined)
-                console.log('new');
-                break;
-        }
         setOpenEditClass(true);
     }
 
@@ -49,7 +36,6 @@ export default function ClassDayTB(props: { date: string }) {
     }, [props.date])
 
     useEffect(() => {
-        // if (!classDate) return
         const dayClassScheduleRef = doc(db, `/class_list/${classDate}`)
         const unsubscribe = onSnapshot(dayClassScheduleRef, (snapshot) => {
             const data = snapshot.data()
@@ -58,61 +44,59 @@ export default function ClassDayTB(props: { date: string }) {
                 return;
             }
             let wholeDayClasses: { [classId: string]: ClassContent } = {}
-            let amClasses: { [classId: string]: ClassContent } = {}
-            let pmClasses: { [classId: string]: ClassContent } = {}
+            let amClassBtnKeyList: string[] = []
+            let pmClassBtnKeyList: string[] = []
             for (const [key, value] of Object.entries(data!)) {
                 wholeDayClasses[key] = value
                 const classSession = key.split('_')[0]
                 if (classSession === 'am') {
-                    amClasses[key] = value
+                    amClassBtnKeyList.push(key)
                 } else if (classSession === 'pm') {
-                    pmClasses[key] = value
+                    pmClassBtnKeyList.push(key)
                 }
             }
+            // sort amClassBtnKeyList and amClassBtnKeyList
+            const amClassBtnList = amClassBtnKeyList.sort().map((key) => {
+                const classContent = wholeDayClasses[key]
+                const numberOfAttendees = Object.keys(classContent.attendees).length
+                return (
+                    <Button key={key} variant="contained" color="primary" sx={{ margin: 1 }} onClick={() => handleEditClass(key)}>
+                        {classContent.time}/{classContent.classType}/{classContent.instructor}/{numberOfAttendees}-{classContent.maxAttendees}
+                    </Button>
+                )
+            })
+            const pmClassBtnList = pmClassBtnKeyList.sort().map((key) => {
+                const classContent = wholeDayClasses[key]
+                const numberOfAttendees = Object.keys(classContent.attendees).length
+                return (
+                    <Button key={key} variant="contained" color="primary" sx={{ margin: 1 }} onClick={() => handleEditClass(key)}>
+                        {classContent.time}/{classContent.classType}/{classContent.instructor}/{numberOfAttendees}-{classContent.maxAttendees}
+                    </Button>
+                )
+            })
+
             setWholeDayClassList(wholeDayClasses)
-            setMorningClassList(amClasses)
-            setAfternoonClassList(pmClasses)
+            setAmClassBtn(amClassBtnList)
+            setPmClassBtn(pmClassBtnList)
         }, (error) => {
             console.log(error)
         })
         return unsubscribe
     }, [classDate])
 
-    useEffect(() => {
-        const amClassBtn = Object.entries(amClassList)
-            .sort(([keyA], [keyB]) => keyA.localeCompare(keyB)) // Sort by key
-            .map(([key, value]) => {
-                return (
-                    <Button variant="contained" color="primary" key={key} onClick={() => handleEditClass(key)}>
-                        {value.time}/{value.classType}/{value.instructor}/{Object.keys(value.attendees).length}of{value.maxAttendees}
-                    </Button>
-                )
-            })
-        setAmClassBtn(amClassBtn)
-    }, [amClassList])
 
-    useEffect(() => {
-        const pmClassBtn = Object.entries(pmClassList)
-            .sort(([keyA], [keyB]) => keyA.localeCompare(keyB)) // Sort by key
-            .map(([key, value]) => {
-                return (
-                    <Button variant="contained" color="primary" key={key} onClick={() => handleEditClass(key)}>
-                        {value.time}/{value.classType}/{value.instructor}/{Object.keys(value.attendees).length}of{value.maxAttendees}
-                    </Button>
-                )
-            })
-        setPmClassBtn(pmClassBtn)
-    }, [pmClassList])
-
-
+    let borderStyle: string = '1px solid #ccc'
+    if (classDate === dayjs().format('YYYY-MM-DD')) {
+        borderStyle = '3px solid #ff9800'
+    }
 
     return (
-        <Container sx={{ padding: 2, border: '1px solid #ccc', borderRadius: 2, marginBottom: 2 }}>
+        <Container sx={{ padding: 2, border: borderStyle, borderRadius: 2, marginBottom: 2 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: `space-between`, mb: 1 }}>
                 <Typography variant="body1">
                     {dayjs(classDate).format('dddd, YYYY-MM-DD')}
                 </Typography>
-                <Button variant="contained" color="primary" onClick={() => handleEditClass('new')}>
+                <Button variant="contained" color="primary" onClick={() => setOpenClassAdd(true)}>
                     新增課堂
                 </Button>
             </Box>
@@ -121,18 +105,16 @@ export default function ClassDayTB(props: { date: string }) {
             <Box sx={{ borderBottom: '1px dotted #ccc', my: 1 }} />
             <Box sx={{ paddingX: 2, gap: 2, display: 'flex', flexWrap: 'wrap' }}> {pmClassBtn}</Box>
 
-
-            <ClassEdit
+            {openEditClass && <ClassEdit
                 open={openEditClass}
-                onClose={() => {
-                    setOpenEditClass(false);
-                    setTargetClassContent(undefined);
-                }}
+                onClose={() => { setOpenEditClass(false); }}
                 classDate={classDate}
                 classWholeDateList={wholeDayClassList}
                 classKey={targetClassKey}
-                classContent={targetClassContent}
-            />
+            />}
+            {openClassAdd &&
+                <ClassAdd open={openClassAdd} onClose={() => setOpenClassAdd(false)} classDate={classDate} classWholeDateList={wholeDayClassList} />
+            }
         </Container>
     );
 }

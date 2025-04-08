@@ -26,7 +26,7 @@ dayjs.tz.setDefault("Asia/Hong_Kong");
 
 // classDate comes in format of YYYY-MM-DD
 // classKey comes in format of 'am_HHmm' or 'pm_HHmm' or 'new' => 'new' means new class
-export default function ClassEdit(props: { open: boolean, onClose: () => void, classDate: string, classWholeDateList: { [classId: string]: ClassContent }, classKey: string, classContent: ClassContent | undefined }) {
+export default function ClassEdit(props: { open: boolean, onClose: () => void, classDate: string, classWholeDateList: { [classId: string]: ClassContent }, classKey: string}) {
     const [infoMessage, setInfoMessage] = useState<string | undefined>(undefined)
     const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined)
     const [successMessage, setSuccessMessage] = useState<string | undefined>(undefined)
@@ -35,7 +35,7 @@ export default function ClassEdit(props: { open: boolean, onClose: () => void, c
     const [classDate, setClassDate] = useState<string>(props.classDate)
     const [classFullList, setClassFullList] = useState<{ [classId: string]: ClassContent } | undefined>(props.classWholeDateList)
     const [classKey, setClassKey] = useState<string>(props.classKey)
-    const [classContent, setClassContnet] = useState<ClassContent | undefined>(props.classContent)
+    const [classContent, setClassContnet] = useState<ClassContent | undefined>(undefined)
 
     const [classTime, setClassTime] = useState<string>(dayjs().format('HH:mm'))
     const [classDuration, setClassDuration] = useState<number>(60)
@@ -147,8 +147,8 @@ export default function ClassEdit(props: { open: boolean, onClose: () => void, c
         setClassDate(props.classDate)
         setClassFullList(props.classWholeDateList)
         setClassKey(props.classKey)
-        setClassContnet(props.classContent)
-    }, [props.classDate, props.classWholeDateList, props.classKey, props.classContent])
+        setClassContnet(props.classWholeDateList[props.classKey])
+    }, [props.classDate, props.classWholeDateList, props.classKey])
 
 
     useEffect(() => {
