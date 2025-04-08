@@ -76,3 +76,11 @@ export interface ClassContent{
 //         ri_0002: 'john',
 //     }
 // }
+
+export interface DailyTmpCnt{
+    [classId: string]: ClassContent
+}
+
+export interface WeeklyTmpCnt{
+    [weekDay: string]: DailyTmpCnt
+}
