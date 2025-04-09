@@ -74,7 +74,7 @@ export default function App() {
                 <Divider />
                 <ListItemButton onClick={() => setView(<ClassSchTmp />)}>
                     <ListItemIcon > <ReceiptIcon /> </ListItemIcon>
-                    <ListItemText primary="時間表模組" />
+                    <ListItemText primary="時間表模板" />
                 </ListItemButton>
 
                 <Divider />

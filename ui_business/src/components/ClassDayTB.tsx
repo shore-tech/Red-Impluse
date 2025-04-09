@@ -71,7 +71,6 @@ export default function ClassDayTB(props: { date: string }) {
                     </Button>
                 )
             })
-
             setWholeDayClassList(wholeDayClasses)
             setAmClassBtn(amClassBtnList)
             setPmClassBtn(pmClassBtnList)

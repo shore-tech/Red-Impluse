@@ -45,7 +45,7 @@ export default function ClassSchTmp() {
                     <EventAvailableIcon />
                 </Avatar>
                 <Typography variant="body1">
-                    時間表模組
+                    時間表模板
                 </Typography>
             </Box>
             {weekDayKeyList.map((dayKey) => 
