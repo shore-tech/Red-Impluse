@@ -22,7 +22,7 @@ export interface GridMemberRowEntry {
     detail?: MemberObj
 }
 
-export interface MemberObj{
+export interface MemberObj {
     id?: string,
     firstName: string,
     lastName: string,
@@ -32,7 +32,7 @@ export interface MemberObj{
     dateOfBirth: string,
     join_date: string,
     mbsExpDate?: string,
-    paymentRecord?: number|string,
+    paymentRecord?: number | string,
     fullName?: string,
     address?: string,
     beltColor?: string,
@@ -42,11 +42,11 @@ export interface MemberObj{
     // class_record?: string,
 }
 
-export interface BjjLevelRecord{
+export interface BjjLevelRecord {
     [promotionDate: string]: BjjLevelRecordEntry
 }
 
-export interface BjjLevelRecordEntry{
+export interface BjjLevelRecordEntry {
     id?: string,
     promotionDate: string,
     stripe: number,
@@ -56,13 +56,13 @@ export interface BjjLevelRecordEntry{
 }
 
 // **************** class ****************
-export interface ClassContent{
+export interface ClassContent {
     time: string,
     duration: number,
     classType: string,
     instructor: string,
     maxAttendees: number,
-    attendees: {[key:string]: string},
+    attendees: { [key: string]: string },
 }
 // example
 // pm_0200:{
@@ -77,10 +77,21 @@ export interface ClassContent{
 //     }
 // }
 
-export interface DailyTmpCnt{
+export interface DailyTmpCnt {
     [classId: string]: ClassContent
 }
 
-export interface WeeklyTmpCnt{
+export interface WeeklyTmpCnt {
     [weekDay: string]: DailyTmpCnt
 }
+
+
+// **************** coach ****************
+export interface CoachObj {
+    [classType: string]: boolean
+}
+
+// export interface CoachInDb {
+//     classType: string[],
+//     [coachName:string]: CoachObj
+// }

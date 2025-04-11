@@ -8,16 +8,15 @@ import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 
 // local imports
 import { styleMainColBox } from "./CommonComponents";
-import ClassDayTB from "./ClassDayTB";
+import ClassSchTmpDayCard from "./ClassSchTmpDayCard";
+import { WeeklyTmpCnt } from "../utils/dataInterface";
 
 // date time
 import dayjs, { Dayjs } from 'dayjs';
 import 'dayjs/locale/zh-hk';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
-import { ClassContent, DailyTmpCnt, WeeklyTmpCnt } from "../utils/dataInterface";
 import { db } from "../utils/firebaseConfig";
-import ClassSchTmpDayCard from "./ClassSchTmpDayCard";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.tz.setDefault("Asia/Hong_Kong");

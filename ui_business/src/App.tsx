@@ -13,6 +13,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import AccountBoxIcon from '@mui/icons-material/AccountBox';
 import ReceiptIcon from '@mui/icons-material/Receipt';
+import SportsGymnasticsIcon from '@mui/icons-material/SportsGymnastics';
 
 // local components
 import AuthLogin from './components/AuthLogin';
@@ -28,6 +29,7 @@ import dayjs, { Dayjs } from 'dayjs';
 import 'dayjs/locale/zh-hk';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
+import ClassSchCoach from './components/ClassSchCoach';
 dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.tz.setDefault("Asia/Hong_Kong");
@@ -72,6 +74,10 @@ export default function App() {
                 </ListItemButton>
 
                 <Divider />
+                <ListItemButton onClick={() => setView(<ClassSchCoach />)}>
+                    <ListItemIcon > <SportsGymnasticsIcon /> </ListItemIcon>
+                    <ListItemText primary="教練列表" />
+                </ListItemButton>
                 <ListItemButton onClick={() => setView(<ClassSchTmp />)}>
                     <ListItemIcon > <ReceiptIcon /> </ListItemIcon>
                     <ListItemText primary="時間表模板" />
@@ -108,7 +114,7 @@ export default function App() {
                         createdBy: idTokenResult.claims.createdBy as string,
                     }
                     setUserClaims(cunstomClaims);
-                    setView(<ClassSchTmp />);
+                    setView(<ClassSchCoach />);
                 })
             } else {
                 setDrawerWidth(0);

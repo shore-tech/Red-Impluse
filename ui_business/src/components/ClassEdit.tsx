@@ -318,7 +318,6 @@ export default function ClassEdit(props: { open: boolean, onClose: () => void, c
                         </Box>
                     </Grid>
                     <Grid item xs={12} sm={6} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }} >
-                        {/* make btn to close the Modal */}
                         <Button variant="contained" color="primary" onClick={handleSaveChange} sx={{ width: '50%', my: 1 }}>
                             儲存
                         </Button>
@@ -335,8 +334,8 @@ export default function ClassEdit(props: { open: boolean, onClose: () => void, c
                     </Grid>
                 </Grid>
                 {isLoading && <LoadingBox open={isLoading} onClose={() => setIsLoading(false)} />}
-                {infoMessage && <MessageBox open={infoMessage ? true : false} onClose={() => setInfoMessage(undefined)} type='info' message={infoMessage} />}
-                {errorMessage && <MessageBox open={errorMessage ? true : false} onClose={() => setErrorMessage(undefined)} type='error' message={errorMessage} />}
+                {infoMessage && <MessageBox open={infoMessage ? true : false} onClose={() => { setIsLoading(false); setInfoMessage(undefined) }} type='info' message={infoMessage} />}
+                {errorMessage && <MessageBox open={errorMessage ? true : false} onClose={() => { setIsLoading(false); setErrorMessage(undefined) }} type='error' message={errorMessage} />}
                 {successMessage && <MessageBox open={successMessage ? true : false} onClose={() => handleCloseAndClear()} type='success' message={successMessage} />}
             </Box>
         </Modal >
