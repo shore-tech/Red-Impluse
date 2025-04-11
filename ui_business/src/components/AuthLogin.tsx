@@ -36,17 +36,17 @@ export default function AuthLogin() {
     function handleLogin() {
         console.log('function login is called');
         setPersistence(auth, browserLocalPersistence).then(() => {
-            signInWithEmailAndPassword(auth, login.email, login.password).then((userCredential) => {
-                // Signed in 
-                const userEmail = userCredential.user.email;
-                console.log(`Login => user email: ${userEmail} is logged in`);
-                window.location.href = '/'
-
+            signInWithEmailAndPassword(auth, login.email, login.password).then((result: UserCredential) => {
+                console.log('login success with password');
+                // result.user.getIdToken().then((idToken) => {
+                //     console.log('ID Token:', idToken); 
+                //     // You can now use the ID token for authentication or API calls
+                // });
             }).catch((error) => {
                 console.log(error.message);
                 setResMessage(<Alert severity="error">email/password incorrect</Alert>);
-            })
-        })
+            });
+        });
     }
 
     function resetPassword() {
@@ -65,17 +65,10 @@ export default function AuthLogin() {
     function loginWithGoogle() {
         console.log('login with google is called');
         signInWithPopup(auth, authGoogleProvider).then((result: UserCredential) => {
-            const credential = GoogleAuthProvider.credentialFromResult(result);
-            if (credential === null) {
-                console.log('credential is null');
-                return
-            }
-            const token = credential.accessToken;
-            const user = result.user;
-            console.log(`result: ${result.operationType}`);
-            console.log(credential);
-            console.log(token);
-            console.log(user);
+            console.log('login success with google');
+            // result.user.getIdToken().then((idToken) => {
+            //     console.log('ID Token:', idToken); // Logs the ID token
+            // });
         }).catch((error) => {
             console.log(error.message);
             setResMessage(<Alert variant="filled" severity="error"> 你沒有登入權限，請聯絡系統管理員。</Alert>)
@@ -125,15 +118,15 @@ export default function AuthLogin() {
                                     if (e.key === 'Enter') { handleLogin() }
                                 }}
                             />
-                            <Button variant="contained" sx={{ width: '50%', display: 'block', margin: 'auto', my:1 }} onClick={handleLogin} >
+                            <Button variant="contained" sx={{ width: '50%', display: 'block', margin: 'auto', my: 1 }} onClick={handleLogin} >
                                 登入
                             </Button>
-                            <Button variant='outlined' sx={{ width: '50%', display: 'block', margin: 'auto', my:1 }} onClick={() => { setIsforgetPassword(true); setResMessage(undefined) }}>
+                            <Button variant='outlined' sx={{ width: '50%', display: 'block', margin: 'auto', my: 1 }} onClick={() => { setIsforgetPassword(true); setResMessage(undefined) }}>
                                 忘記密碼？
                             </Button>
                         </Box>
                         <Divider variant='fullWidth' sx={{ my: 2 }}>Login in with</Divider>
-                        <Button variant='contained' sx={{ width: '30%',display: 'block', margin: 'auto', my: 1, borderRadius: '50px', textTransform: 'none' }} onClick={loginWithGoogle}>
+                        <Button variant='contained' sx={{ width: '30%', display: 'block', margin: 'auto', my: 1, borderRadius: '50px', textTransform: 'none' }} onClick={loginWithGoogle}>
                             Google
                         </Button>
                     </Box>

@@ -1,5 +1,5 @@
 // react component for member page
-import { useContext, useEffect, useState } from "react";
+import { use, useContext, useEffect, useState } from "react";
 
 // third party imports
 import { addDoc, collection, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
@@ -11,12 +11,15 @@ import dayjs from "dayjs";
 
 // local imports
 import { btnBox, LoadingBox, MessageBox, styleFormHeadBox, styleModalBox } from "./CommonComponents";
-import { CustomClaimsCtx } from "../utils/contexts";
+import { CustomClaimsCtx, localServerUrl, UserIdTokenCtx } from "../utils/contexts";
 import { MemberObj } from "../utils/dataInterface";
 import { db } from "../utils/firebaseConfig";
+import axios from "axios";
 
 
 export default function MemberAdd(props: { open: boolean, onClose: () => void }) {
+    const userIdToken:string|undefined = useContext(UserIdTokenCtx)
+
     const [infoMessage, setInfoMessage] = useState<string | undefined>(undefined)
     const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined)
     const [successMessage, setSuccessMessage] = useState<string | undefined>(undefined)
@@ -31,12 +34,32 @@ export default function MemberAdd(props: { open: boolean, onClose: () => void })
     const [beltColor, setBeltColor] = useState<string>('White')
     const [stripe, setStripe] = useState<number>(0)
     const [joinDate, setJoinDate] = useState<string>('')
-    // const [mbsExpDate, setMbsExpDate] = useState<string>('')
     const [address, setAddress] = useState<string>('')
 
 
-    const addNewMember = () => {
-        // set post request to firebase to add new member
+    const addNewMember = async () => {
+        // create authentication for user
+        axios.post(`${localServerUrl}/addMember`, {
+            displaName: `${firstName} ${lastName}`,
+            email: email,
+            mobile: mobile,
+            role: 'member',
+            roleLevel: 0,
+        }, {
+            headers: { Authorization: `Bearer ${userIdToken}` }
+        }).then((res) => {
+            console.log('res: ', res);
+            if (res.status === 200) {
+                setSuccessMessage(`New member ${newMemberId} added successfully.`);
+            } else {
+                setErrorMessage(`Error ${res.status}: `);
+                return
+            }
+        }).catch((err) => {
+            setErrorMessage(`${err.response.data.error}`);
+            return
+        })
+        // set member obj for database
         const newMember: MemberObj = {
             firstName: firstName,
             lastName: lastName,
@@ -56,7 +79,8 @@ export default function MemberAdd(props: { open: boolean, onClose: () => void })
         let newMemberId = ''
         let summaryDocData = {}
         setIsLoading(true)
-        getDoc(summaryDocRef).then(doc => {
+        // generate new member id
+        await getDoc(summaryDocRef).then(doc => {
             if (doc.exists()) {
                 summaryDocData = doc.data()
                 let member_list: string[] | number[] = Object.keys(summaryDocData)
@@ -66,20 +90,20 @@ export default function MemberAdd(props: { open: boolean, onClose: () => void })
                 newMemberId = 'ri_0001'
             }
             console.log('adding new member: ', newMemberId);
-        }).then(() => {
-            // update the summary doc
-            updateDoc(summaryDocRef, { [newMemberId]: newMember }).then(() => {
-                console.log(`New member ${newMemberId} added successfully.`)
-            }).then(() => {
-                // add new member doc
-                setDoc(doc(db, `/member_list/${newMemberId}`), newMember).then(() => {
-                    setIsLoading(false)
-                    setSuccessMessage(`New member ${newMemberId} added successfully.`);
-                })
-            })
         }).catch(err => {
-            setIsLoading(false)
             setErrorMessage(err.message)
+            return
+        })
+        // add new member to summary doc
+        await updateDoc(summaryDocRef, { [newMemberId]: newMember }).then(() => {
+            console.log(`New member ${newMemberId} added successfully.`)
+        }).catch(err => {
+            setErrorMessage(err.message)
+            return
+        })
+        // add new member doc
+        setDoc(doc(db, `/member_list/${newMemberId}`), newMember).then(() => {
+            setSuccessMessage(`New member ${newMemberId} added successfully.`);
         })
     }
 
@@ -89,7 +113,7 @@ export default function MemberAdd(props: { open: boolean, onClose: () => void })
     }
 
     return (
-        <Modal open={props.open} onClose={props.onClose}>
+        <Modal open={props.open} onClose={props.onClose} >
             <Box sx={styleModalBox}>
                 <Box sx={styleFormHeadBox}>
                     <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}> <PersonAddIcon /> </Avatar>
@@ -231,20 +255,16 @@ export default function MemberAdd(props: { open: boolean, onClose: () => void })
                         />
                     </Grid>
                     <Box sx={btnBox}>
-                        <Button variant="contained" onClick={addNewMember}>新增</Button>
+                        <Button variant="contained" onClick={addNewMember} disabled={!userIdToken}>新增</Button>
                         <Button variant="contained" onClick={props.onClose}>取消</Button>
                     </Box>
                 </Grid>
                 {isLoading && <LoadingBox open={isLoading} onClose={() => setIsLoading(false)} />}
-                {infoMessage && <MessageBox open={infoMessage ? true : false} onClose={() => setInfoMessage(undefined)} type='info' message={infoMessage} />}
-                {errorMessage && <MessageBox open={errorMessage ? true : false} onClose={() => setErrorMessage(undefined)} type='error' message={errorMessage} />}
+                {infoMessage && <MessageBox open={infoMessage ? true : false} onClose={() => { setIsLoading(false); setInfoMessage(undefined) }} type='info' message={infoMessage} />}
+                {errorMessage && <MessageBox open={errorMessage ? true : false} onClose={() => { setIsLoading(false); setErrorMessage(undefined) }} type='error' message={errorMessage} />}
                 {successMessage && <MessageBox open={successMessage ? true : false} onClose={() => handleCloseAndClear()} type='success' message={successMessage} />}
 
-
-                {/* {errorMessage && <MessageBox open={errorMessage ? true : false} onClose={() => setErrorMessage(undefined)} type='error' message={errorMessage} />}
-                {successMessage && <MessageBox open={successMessage ? true : false} onClose={props.onClose} type='success' message={successMessage} />} */}
-
             </Box>
-        </Modal>
+        </Modal >
     );
 }

@@ -7,3 +7,9 @@ export const CustomClaimsCtx = createContext<
         roleLevel: 5 | 4 | 3 | 2 | 1
     } | undefined
 >(undefined);
+
+
+export const UserIdTokenCtx = createContext<string | undefined>(undefined);
+
+export const localServerUrl = "http://127.0.0.1:5001/red-impluse/us-central1/app";
+export const cloudServerUrl = "https://app-pexeirbrzq-uc.a.run.app"

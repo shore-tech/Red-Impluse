@@ -22,7 +22,7 @@ import ClassSchedule from './components/ClassSchedule';
 import ClassSchTmp from './components/ClassSchTmp';
 import { auth } from './utils/firebaseConfig';
 import { CustomClaims } from './utils/dataInterface';
-import { CustomClaimsCtx } from './utils/contexts';
+import { CustomClaimsCtx, UserIdTokenCtx } from './utils/contexts';
 
 // date time
 import dayjs, { Dayjs } from 'dayjs';
@@ -40,6 +40,7 @@ export default function App() {
     const [view, setView] = useState<JSX.Element>(<CircularProgress />)
 
     const [userClaims, setUserClaims] = useState<CustomClaims | undefined>(undefined)
+    const [UserIdToken, setUserIdToken] = useState<string>('')
 
     // 1. create ref height from app bar
     const [appBarHeight, setAppBarHeight] = useState<number>(0)
@@ -65,7 +66,7 @@ export default function App() {
 
                 <ListItemButton onClick={() => setView(<Member />)}>
                     <ListItemIcon> <AccountBoxIcon /> </ListItemIcon>
-                    <ListItemText primary="會員管理" />
+                    <ListItemText primary="會員" />
                 </ListItemButton>
 
                 <ListItemButton>
@@ -113,7 +114,10 @@ export default function App() {
                         roleLevel: idTokenResult.claims.roleLevel as 5 | 4 | 3 | 2 | 1,
                         createdBy: idTokenResult.claims.createdBy as string,
                     }
+                    console.log('idTokenResult:', idTokenResult);
+                    console.log('id token:', idTokenResult.token);
                     setUserClaims(cunstomClaims);
+                    setUserIdToken(idTokenResult.token)
                     setView(<ClassSchCoach />);
                 })
             } else {
@@ -133,38 +137,39 @@ export default function App() {
 
     return (
         <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale='zh-hk'>
-            <CustomClaimsCtx.Provider value={userClaims}>
-                <Box sx={{ width: { md: `calc(100% - ${drawerWidth}px)`, xs: '100%' } }}>
-                    <AppBar position="sticky" ref={appBarRef}>
-                        <Toolbar >
-                            <Avatar src="/favicon.ico" sx={{ mr: 2 }} />
-                            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                                赤兔道場-管理系統
-                            </Typography>
-                            {auth.currentUser && <> {/* if user is logged in, show the menu icon */}
-                                <IconButton color="inherit" sx={{ display: { md: 'none' } }} onClick={() => setDrawerOpen(true)} >
-                                    <MenuIcon />
-                                </IconButton>
-                            </>}
-                        </Toolbar>
-                    </AppBar>
-                    {view}
-                </Box>
-                {/* side bar */}
-                {auth.currentUser &&
-                    <Box>
-                        {/* xs view */}
-                        <Drawer anchor='right' sx={{ display: { md: 'none' } }} open={drawOpen} onClose={() => setDrawerOpen(false)} >
-                            {DrawerList}
-                        </Drawer>
-                        {/* md view */}
-                        <Drawer variant='permanent' anchor='right' sx={{ display: { xs: 'none', md: 'block' } }}>
-                            {DrawerList}
-                        </Drawer>
+            <UserIdTokenCtx.Provider value={UserIdToken}>
+                <CustomClaimsCtx.Provider value={userClaims}>
+                    <Box sx={{ width: { md: `calc(100% - ${drawerWidth}px)`, xs: '100%' } }}>
+                        <AppBar position="sticky" ref={appBarRef}>
+                            <Toolbar >
+                                <Avatar src="/favicon.ico" sx={{ mr: 2 }} />
+                                <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+                                    赤兔道場-管理系統
+                                </Typography>
+                                {auth.currentUser && <> {/* if user is logged in, show the menu icon */}
+                                    <IconButton color="inherit" sx={{ display: { md: 'none' } }} onClick={() => setDrawerOpen(true)} >
+                                        <MenuIcon />
+                                    </IconButton>
+                                </>}
+                            </Toolbar>
+                        </AppBar>
+                        {view}
                     </Box>
-                }
-
-            </CustomClaimsCtx.Provider >
+                    {/* side bar */}
+                    {auth.currentUser &&
+                        <Box>
+                            {/* xs view */}
+                            <Drawer anchor='right' sx={{ display: { md: 'none' } }} open={drawOpen} onClose={() => setDrawerOpen(false)} >
+                                {DrawerList}
+                            </Drawer>
+                            {/* md view */}
+                            <Drawer variant='permanent' anchor='right' sx={{ display: { xs: 'none', md: 'block' } }}>
+                                {DrawerList}
+                            </Drawer>
+                        </Box>
+                    }
+                </CustomClaimsCtx.Provider >
+            </UserIdTokenCtx.Provider>
         </LocalizationProvider>
     );
 }
