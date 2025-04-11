@@ -86,7 +86,7 @@ export default function MemberAdd(props: { open: boolean, onClose: () => void, m
         setIsLoading(true)
         // generate new member id
         await getDoc(summaryDocRef).then(doc => {
-            if (doc.exists()) {
+            if (doc.exists() && Object.keys(doc.data()).length > 0) {
                 summaryDocData = doc.data()
                 let member_list: string[] | number[] = Object.keys(summaryDocData)
                 member_list = member_list.map((id) => parseInt(id.split('_')[1]))
