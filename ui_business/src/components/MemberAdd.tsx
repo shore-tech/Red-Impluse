@@ -17,8 +17,9 @@ import { db } from "../utils/firebaseConfig";
 import axios from "axios";
 
 
-export default function MemberAdd(props: { open: boolean, onClose: () => void }) {
-    const userIdToken:string|undefined = useContext(UserIdTokenCtx)
+export default function MemberAdd(props: { open: boolean, onClose: () => void, memberEmailList: string[] }) {
+    const userIdToken: string | undefined = useContext(UserIdTokenCtx)
+    const summaryDocRef = doc(db, '/member_list/summary')
 
     const [infoMessage, setInfoMessage] = useState<string | undefined>(undefined)
     const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined)
@@ -38,6 +39,10 @@ export default function MemberAdd(props: { open: boolean, onClose: () => void })
 
 
     const addNewMember = async () => {
+        if (!firstName || !lastName || !email || !mobile) { setErrorMessage('Email and mobile are required.'); return }
+        // check if email is existed
+        if (props.memberEmailList.includes(email)) { setErrorMessage(`Email ${email} is already existed!`); return }
+
         // create authentication for user
         axios.post(`${localServerUrl}/addMember`, {
             displaName: `${firstName} ${lastName}`,

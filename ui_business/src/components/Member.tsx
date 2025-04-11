@@ -24,6 +24,7 @@ export default function Member() {
     const [successMessage, setSuccessMessage] = useState<string | undefined>(undefined)
     const [isLoading, setIsLoading] = useState<boolean>(false)
 
+    const [memberEmailList, setMemberEmailList] = useState<string[]>([])
 
     const [openAddMember, setOpenAddMember] = useState<boolean>(false)
     const [selectedRow, setSelectedRow] = useState<MemberObj | undefined>(undefined)
@@ -50,9 +51,11 @@ export default function Member() {
     const CustomToolbar = () => {
         return (
             <GridToolbarContainer>
-                <Button color="primary" startIcon={<AddIcon />} onClick={() => setOpenAddMember(true)}>
-                    新增會員
-                </Button>
+                {memberEmailList &&
+                    <Button color="primary" startIcon={<AddIcon />} onClick={() => setOpenAddMember(true)}>
+                        新增會員
+                    </Button>
+                }
             </GridToolbarContainer>
         );
     }
@@ -60,6 +63,7 @@ export default function Member() {
     useEffect(() => {
         setIsLoading(true)
         const customerSumRef = doc(db, '/member_list/summary')
+        let emailList: string[] = []
         const unsubscribe = onSnapshot(customerSumRef, (snapshot) => {
             const data_sum = snapshot.data()
             const rowEntries: MemberObj[] = []
@@ -68,6 +72,7 @@ export default function Member() {
                     ...mbs_data,
                     id: mbs_id,
                 })
+                emailList.push(mbs_data.email)
             }
             // sort rows by id
             rowEntries.sort((a, b) => {
@@ -77,6 +82,7 @@ export default function Member() {
             })
             setIsLoading(false)
             setTableRows(rowEntries)
+            setMemberEmailList(emailList)
         }, (error) => {
             setIsLoading(false)
             setErrorMessage(error.message)
@@ -115,7 +121,7 @@ export default function Member() {
                 />
             </Box>
 
-            {openAddMember && <MemberAdd open={openAddMember} onClose={() => setOpenAddMember(false)} />}
+            {openAddMember && <MemberAdd open={openAddMember} onClose={() => setOpenAddMember(false)} memberEmailList={memberEmailList} />}
             {userClaimCtx && userClaimCtx.roleLevel >= 3 && selectedRow && <MemberEditBasic open={openMemberEditBasic} onClose={() => { setOpenMemberEditBasic(false); setSelectedRow(undefined) }} selectedRow={selectedRow} />}
             {userClaimCtx && userClaimCtx.roleLevel >= 3 && selectedRow && <MemberEditBjj open={openMemberEditBjj} onClose={() => { setOpenMemberEditBjj(false); setSelectedRow(undefined) }} selectedRow={selectedRow} />}
         </Container>

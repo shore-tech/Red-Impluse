@@ -21,7 +21,7 @@ export function authenticateClient(req: Request, res: Response, next: NextFuncti
         const idToken = req.headers.authorization.split('Bearer ')[1];
         if (!idToken || typeof idToken !== 'string') {
             console.log('Invalid idToken:', idToken);
-            res.status(400).json({msg: 'Invalid idToken format.'});
+            res.status(400).json({ msg: 'Invalid idToken format.' });
             return;
         }
         auth.verifyIdToken(idToken)
@@ -61,7 +61,7 @@ export async function createUser(req: Request, res: Response, next: NextFunction
     console.log(req.body);
     const userRoleLevel = res.locals.decodedToken.roleLevel;
     const targetRoleLevel = req.body.roleLevel;
-    if (userRoleLevel < 3 || userRoleLevel < targetRoleLevel) { res.status(401).send('Unauthorized');  return}
+    if (userRoleLevel < 3 || userRoleLevel < targetRoleLevel) { res.status(401).send('Unauthorized'); return }
     await auth.createUser({
         email: req.body.email,
         emailVerified: false,
@@ -99,4 +99,17 @@ export async function setUserRole(req: Request, res: Response, next: NextFunctio
         return
     });
     next();
+}
+
+export async function deleteUser(req: Request, res: Response, next: NextFunction) {
+    console.log(`\n-----> deleteUser() ${dayjs().tz().format('DD MMM YYYY hh:mm:ss A Z')}`);
+    console.log(req.body.targetEmail);
+    try {
+        const userRecord = await auth.getUserByEmail(req.body.targetEmail)
+        await auth.deleteUser(userRecord.uid)
+        res.status(200).send({ msg: 'User deleted.' });
+    } catch (error) {
+        res.status(404).send({ msg: 'User not found.', error: error }); // Ensure response is sent and function exits
+        return
+    }
 }

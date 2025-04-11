@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 
 // third party imports
-import { doc, onSnapshot, updateDoc } from "firebase/firestore";
+import { deleteField, doc, onSnapshot, updateDoc } from "firebase/firestore";
 import { Avatar, Box, Button, FormGroup, FormControlLabel, Grid, Modal, TextField, Typography, Checkbox } from "@mui/material";
 import SportsGymnasticsIcon from '@mui/icons-material/SportsGymnastics';
 
@@ -39,7 +39,7 @@ export default function CoachAddEdit(props: { open: boolean, onClose: () => void
     }
     const handleDelCoach = () => {
         setIsLoading(true)
-        updateDoc(doc(db, `/class_list/coach`), { [props.targetCoach]: null }).then(() => {
+        updateDoc(doc(db, `/class_list/coach`), { [props.targetCoach]: deleteField() }).then(() => {
             setSuccessMessage(`教練 ${props.targetCoach} 已刪除!`)
         }).catch((err) => {
             setErrorMessage(`Error: ${err.message}`)

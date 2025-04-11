@@ -2,7 +2,7 @@
 import { useContext, useEffect, useState } from "react";
 
 // third party imports
-import { addDoc, collection, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import { deleteDoc, deleteField, doc, updateDoc } from "firebase/firestore";
 import { Avatar, Box, Button, FormControl, Grid, InputLabel, MenuItem, Modal, Select, TextField, Typography } from "@mui/material";
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import { DatePicker } from "@mui/x-date-pickers";
@@ -10,13 +10,16 @@ import { MuiTelInput } from "mui-tel-input";
 import dayjs from "dayjs";
 
 // local imports
-import { btnBox, LoadingBox, MessageBox, styleFormHeadBox, styleModalBox } from "./CommonComponents";
+import { LoadingBox, MessageBox, styleFormHeadBox, styleModalBox } from "./CommonComponents";
 import { MemberObj } from "../utils/dataInterface";
 import { db } from "../utils/firebaseConfig";
 import { EditOff } from "@mui/icons-material";
+import axios from "axios";
+import { localServerUrl, UserIdTokenCtx } from "../utils/contexts";
 
 
 export default function MemberEditBasic(props: { open: boolean, onClose: () => void, selectedRow: MemberObj }) {
+    const userIdToken: string | undefined = useContext(UserIdTokenCtx)
     const [infoMessage, setInfoMessage] = useState<string | undefined>(undefined)
     const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined)
     const [successMessage, setSuccessMessage] = useState<string | undefined>(undefined)
@@ -30,6 +33,7 @@ export default function MemberEditBasic(props: { open: boolean, onClose: () => v
     const [dateOfBirth, setDateOfBirth] = useState<string>(props.selectedRow.dateOfBirth)
     const [joinDate, setJoinDate] = useState<string>(props.selectedRow.join_date || '')
     const [address, setAddress] = useState<string>(props.selectedRow.address || '')
+    const [showCfmDelBtn, setShowCfmDelBtn] = useState<boolean>(false)
 
 
     const editMember = () => {
@@ -55,6 +59,31 @@ export default function MemberEditBasic(props: { open: boolean, onClose: () => v
             updateDoc(doc(db, `/member_list/${editedInfo.id!}`), { ...editedInfo }).then(() => {
                 setSuccessMessage(`Member ${editedInfo.id} updated successfully.`);
             })
+        }).catch(err => {
+            setErrorMessage(err.message)
+        })
+    }
+
+    const deleteMember = () => {
+        // delete auth
+        if (email !== '') {
+            axios.delete(`${localServerUrl}/deleteMember`, { headers: { Authorization: `Bearer ${userIdToken}` }, data: { targetEmail: email } }).then(() => {
+                setSuccessMessage(`Member ${props.selectedRow.id} deleted in Auth successfully.`);
+            }).catch(err => {
+                setErrorMessage(err.message)
+            })
+        }
+        // delete from summary
+        const summaryDocRef = doc(db, '/member_list/summary')
+        updateDoc(summaryDocRef, { [props.selectedRow.id!]: deleteField() }).then(() => {
+            setSuccessMessage(`Member ${props.selectedRow.id} deleted in summary successfully.`);   
+        }).catch(err => {
+            setErrorMessage(err.message)
+        })
+        // delete individual record
+        const memberDocRef = doc(db, `/member_list/${props.selectedRow.id}`)
+        deleteDoc(memberDocRef).then(() => {
+            setSuccessMessage(`Member ${props.selectedRow.id} deleted in doc successfully.`);
         }).catch(err => {
             setErrorMessage(err.message)
         })
@@ -168,11 +197,17 @@ export default function MemberEditBasic(props: { open: boolean, onClose: () => v
                             }}
                         />
                     </Grid>
-                    <Box sx={btnBox}>
-                        <Button variant="contained" onClick={editMember}>修改</Button>
-                        <Button variant="contained" onClick={props.onClose}>取消</Button>
-                    </Box>
-                </Grid>
+                    <Grid item xs={12} sm={6} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        <Button variant="contained" onClick={editMember} sx={{ width: '50%', my: 1 }}>修改</Button>
+                        <Button variant="contained" onClick={props.onClose} sx={{ width: '50%', my: 1 }}>取消</Button>
+                    </Grid>
+                    <Grid item xs={12} sm={6} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        <Button variant="contained" sx={{ width: '50%', my: 1 }} onClick={() => setShowCfmDelBtn(!showCfmDelBtn)} disabled={!userIdToken  }>
+                            {showCfmDelBtn ? '取消刪除' : '刪除會員'}
+                        </Button>
+                        {showCfmDelBtn && <Button variant="contained" onClick={deleteMember} sx={{ width: '50%', my: 1 }}>確定刪除?</Button>}
+                    </Grid>
+                </Grid >
 
 
                 {/* {errorMessage && <MessageBox open={errorMessage ? true : false} onClose={() => setErrorMessage(undefined)} type='error' message={errorMessage} />}
@@ -182,7 +217,7 @@ export default function MemberEditBasic(props: { open: boolean, onClose: () => v
                 {errorMessage && <MessageBox open={errorMessage ? true : false} onClose={() => setErrorMessage(undefined)} type='error' message={errorMessage} />}
                 {successMessage && <MessageBox open={successMessage ? true : false} onClose={() => handleCloseAndClear()} type='success' message={successMessage} />}
 
-            </Box>
-        </Modal>
+            </Box >
+        </Modal >
     );
 }
