@@ -101,6 +101,7 @@ export default function App() {
     function handleLogOut() {
         auth.signOut().then(() => {
             console.log('user signed out');
+            setView(<AuthLogin />);
             setDrawerWidth(0)
         }).catch((error) => {
             console.log(error.message);
@@ -117,13 +118,6 @@ export default function App() {
                         roleLevel: idTokenResult.claims.roleLevel as 5 | 4 | 3 | 2 | 1,
                         createdBy: idTokenResult.claims.createdBy as string,
                     }
-                    if (userClaims && userClaims.roleLevel < 3) {
-                        setErrorMessage('You are not authorized to access this system.')
-                        handleLogOut()
-                        return
-                    }
-                    console.log('idTokenResult:', idTokenResult);
-                    console.log('id token:', idTokenResult.token);
                     setUserClaims(cunstomClaims);
                     setUserIdToken(idTokenResult.token)
                     setView(<ClassSchCoach />);
@@ -135,6 +129,14 @@ export default function App() {
         })
         return () => { unsubscribe(); }
     }, [auth])
+
+    useEffect(() => {
+        const  roleLevel = userClaims?.roleLevel as number;
+        if (roleLevel < 3) {
+            setErrorMessage('You are not authorized to access this system.')
+            handleLogOut()
+        }
+    }, [userClaims])
 
 
     useEffect(() => {

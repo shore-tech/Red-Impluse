@@ -11,10 +11,12 @@ import dayjs from "dayjs";
 
 // local imports
 import { btnBox, LoadingBox, MessageBox, styleFormHeadBox, styleModalBox } from "./CommonComponents";
-import { CustomClaimsCtx, localServerUrl, UserIdTokenCtx } from "../utils/contexts";
+import { UserIdTokenCtx } from "../utils/contexts";
+
 import { MemberObj } from "../utils/dataInterface";
 import { db } from "../utils/firebaseConfig";
 import axios from "axios";
+import { cloudServerUrl, localServerUrl } from "../utils/firebaseConfigDetails";
 
 
 export default function MemberAdd(props: { open: boolean, onClose: () => void, memberEmailList: string[] }) {
@@ -44,7 +46,8 @@ export default function MemberAdd(props: { open: boolean, onClose: () => void, m
         if (props.memberEmailList.includes(email)) { setErrorMessage(`Email ${email} is already existed!`); return }
 
         // create authentication for user
-        axios.post(`${localServerUrl}/addMember`, {
+        // axios.post(`${localServerUrl}/addMember`, {
+        axios.post(`${cloudServerUrl}/addMember`, {
             displaName: `${firstName} ${lastName}`,
             email: email,
             mobile: mobile,
@@ -101,14 +104,14 @@ export default function MemberAdd(props: { open: boolean, onClose: () => void, m
         })
         // add new member to summary doc
         await updateDoc(summaryDocRef, { [newMemberId]: newMember }).then(() => {
-            console.log(`New member ${newMemberId} added successfully.`)
+            console.log(`New member ${newMemberId} added to summary successfully.`)
         }).catch(err => {
             setErrorMessage(err.message)
             return
         })
         // add new member doc
         setDoc(doc(db, `/member_list/${newMemberId}`), newMember).then(() => {
-            setSuccessMessage(`New member ${newMemberId} added successfully.`);
+            setSuccessMessage(`New member ${newMemberId} added with new doc successfully.`);
         })
     }
 

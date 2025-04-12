@@ -13,9 +13,9 @@ import dayjs from "dayjs";
 import { LoadingBox, MessageBox, styleFormHeadBox, styleModalBox } from "./CommonComponents";
 import { MemberObj } from "../utils/dataInterface";
 import { db } from "../utils/firebaseConfig";
-import { EditOff } from "@mui/icons-material";
 import axios from "axios";
-import { localServerUrl, UserIdTokenCtx } from "../utils/contexts";
+import { UserIdTokenCtx } from "../utils/contexts";
+import { cloudServerUrl, localServerUrl } from "../utils/firebaseConfigDetails";
 
 
 export default function MemberEditBasic(props: { open: boolean, onClose: () => void, selectedRow: MemberObj }) {
@@ -67,7 +67,12 @@ export default function MemberEditBasic(props: { open: boolean, onClose: () => v
     const deleteMember = () => {
         // delete auth
         if (email !== '') {
-            axios.delete(`${localServerUrl}/deleteMember`, { headers: { Authorization: `Bearer ${userIdToken}` }, data: { targetEmail: email } }).then(() => {
+            axios.delete(
+                // `${localServerUrl}/deleteMember`, 
+                `${cloudServerUrl}/deleteMember`, 
+                { headers: { Authorization: `Bearer ${userIdToken}` }, 
+                data: { targetEmail: email } }
+            ).then(() => {
                 setSuccessMessage(`Member ${props.selectedRow.id} deleted in Auth successfully.`);
             }).catch(err => {
                 setErrorMessage(err.message)
@@ -209,9 +214,6 @@ export default function MemberEditBasic(props: { open: boolean, onClose: () => v
                     </Grid>
                 </Grid >
 
-
-                {/* {errorMessage && <MessageBox open={errorMessage ? true : false} onClose={() => setErrorMessage(undefined)} type='error' message={errorMessage} />}
-                {successMessage && <MessageBox open={successMessage ? true : false} onClose={props.onClose} type='success' message={successMessage} />} */}
                 {isLoading && <LoadingBox open={isLoading} onClose={() => setIsLoading(false)} />}
                 {infoMessage && <MessageBox open={infoMessage ? true : false} onClose={() => setInfoMessage(undefined)} type='info' message={infoMessage} />}
                 {errorMessage && <MessageBox open={errorMessage ? true : false} onClose={() => setErrorMessage(undefined)} type='error' message={errorMessage} />}
