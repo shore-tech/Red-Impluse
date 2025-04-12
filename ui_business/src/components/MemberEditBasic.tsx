@@ -132,6 +132,7 @@ export default function MemberEditBasic(props: { open: boolean, onClose: () => v
                             name="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
+                            disabled
                         />
                     </Grid>
                     <Grid item xs={12} sm={6}>
