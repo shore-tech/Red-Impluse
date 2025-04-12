@@ -30,13 +30,16 @@ import 'dayjs/locale/zh-hk';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import ClassSchCoach from './components/ClassSchCoach';
+import { MessageBox } from './components/CommonComponents';
 dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.tz.setDefault("Asia/Hong_Kong");
 
 
+// This function will handle the layout of the app, and the initial authentication
 export default function App() {
-    // This function will handle the layout of the app, and the initial authentication
+    const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined)
+
     const [view, setView] = useState<JSX.Element>(<CircularProgress />)
 
     const [userClaims, setUserClaims] = useState<CustomClaims | undefined>(undefined)
@@ -114,6 +117,11 @@ export default function App() {
                         roleLevel: idTokenResult.claims.roleLevel as 5 | 4 | 3 | 2 | 1,
                         createdBy: idTokenResult.claims.createdBy as string,
                     }
+                    if (userClaims && userClaims.roleLevel < 3) {
+                        setErrorMessage('You are not authorized to access this system.')
+                        handleLogOut()
+                        return
+                    }
                     console.log('idTokenResult:', idTokenResult);
                     console.log('id token:', idTokenResult.token);
                     setUserClaims(cunstomClaims);
@@ -127,6 +135,7 @@ export default function App() {
         })
         return () => { unsubscribe(); }
     }, [auth])
+
 
     useEffect(() => {
         // Get the height of the AppBar after the component mounts
@@ -168,6 +177,9 @@ export default function App() {
                             </Drawer>
                         </Box>
                     }
+
+
+                    {errorMessage && <MessageBox open={errorMessage ? true : false} onClose={() => setErrorMessage(undefined)} type='error' message={errorMessage} />}
                 </CustomClaimsCtx.Provider >
             </UserIdTokenCtx.Provider>
         </LocalizationProvider>
