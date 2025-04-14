@@ -1,5 +1,5 @@
 // react component for member page
-import { useContext, useEffect, useState } from "react";
+import React, { Dispatch, JSX, SetStateAction, useContext, useEffect, useState } from "react";
 
 // third party imports
 import { Avatar, Box, Button, Container, Grid, IconButton, Typography } from "@mui/material";
@@ -10,7 +10,8 @@ import SkipNextOutlinedIcon from '@mui/icons-material/SkipNextOutlined';
 
 // local imports
 import { styleMainColBox, btnBox } from "./CommonComponents";
-import ClassDayTB from "./ClassDayCard";
+import ClassDayCard from "./ClassDayCard";
+
 
 
 // date time
@@ -21,9 +22,9 @@ import timezone from 'dayjs/plugin/timezone';
 dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.tz.setDefault("Asia/Hong_Kong");
+// Dispatch<SetStateAction<JSX.Element>>
 
-
-export default function ClassSchedule() {
+export default function ClassSchedule(props: { setView: Dispatch<SetStateAction<JSX.Element>> }) {
     const [daysOfWeek, setDaysOfWeek] = useState<string[]>([])
 
     const resetWeekDays = () => {
@@ -67,7 +68,7 @@ export default function ClassSchedule() {
                 <Button size="medium" endIcon={<SkipNextOutlinedIcon />} onClick={() => handleWeekChange(1)}>Next</Button>
             </Box>
             {daysOfWeek && daysOfWeek.map((day) => (
-                <ClassDayTB key={day} date={day} />
+                <ClassDayCard key={day} date={day} setView={props.setView}/>
             ))}
 
         </Container>

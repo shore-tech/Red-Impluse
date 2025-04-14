@@ -1,5 +1,5 @@
 // react component for member page
-import { JSX, useEffect, useState } from "react";
+import { Dispatch, JSX, SetStateAction, useContext, useEffect, useState } from "react";
 
 // third party imports
 import { Box, Button, Container, Typography } from "@mui/material";
@@ -7,25 +7,34 @@ import { doc, onSnapshot } from "firebase/firestore";
 import dayjs from "dayjs";
 
 // local imports
-import { db } from "../utils/firebaseConfig";
-import { ClassContent } from "../utils/dataInterface";
-// import ClassEdit from "./ClassEdit";
+import { auth, db } from "../utils/firebaseConfig";
+import { ClassContent, CustomClaims } from "../utils/dataInterface";
+import { CustomClaimsCtx } from "../utils/contexts";
+import AuthLogin from "./AuthLogin";
+import ClassEnroll from "./ClassEnroll";
 
 
-export default function ClassDayTB(props: { date: string }) {
+export default function ClassDayCard(props: { date: string, setView: Dispatch<SetStateAction<JSX.Element>> }) {
+    const userClaims = useContext(CustomClaimsCtx)
+
     const [classDate, setClassDate] = useState<string>(props.date)
-    const [wholeDayClassList, setWholeDayClassList] = useState<{ [classId: string]: ClassContent }>({})
+    const [wholeDayClassList, setWholeDayClassList] = useState<{ [classId: string]: ClassContent } | undefined>(undefined)
 
     const [amClassBtn, setAmClassBtn] = useState<JSX.Element[]>([])
     const [pmClassBtn, setPmClassBtn] = useState<JSX.Element[]>([])
 
+    const [openEnrollClass, setOpenEnrollClass] = useState<boolean>(false)
+    const [targetClassKey, setTargetClassKey] = useState<string>('new')
+
     const handleEnrollClass = (key: string) => {
         // check if member is logged in
-        // check if member is already enrolled in the class
-        // open a Modal to confirm the enrollment
-        // if confirmed, update the class content in the database
+        if (!auth.currentUser || !userClaims) {
+            props.setView(<AuthLogin setView={props.setView} />)
+        } else {
+            setTargetClassKey(key)
+            setOpenEnrollClass(true)
+        }
     }
-
 
     useEffect(() => {
         setClassDate(props.date)
@@ -49,20 +58,24 @@ export default function ClassDayTB(props: { date: string }) {
                 }
             }
             // sort amClassBtnKeyList and amClassBtnKeyList
-            const amClassBtnList = amClassBtnKeyList.sort().map((key) => {
-                const classContent = wholeDayClasses[key]
+            const amClassBtnList = amClassBtnKeyList.sort().map((classKey) => {
+                const classContent = wholeDayClasses[classKey]
                 const numberOfAttendees = Object.keys(classContent.attendees).length
+                const isDisabled = (numberOfAttendees >= classContent.maxAttendees) && !(userClaims?.memberId as string in classContent.attendees)
+                const btnColor: "primary" | "success" = (userClaims?.memberId as string in classContent.attendees) ? 'success' : 'primary'
                 return (
-                    <Button key={key} variant="contained" color="primary" sx={{ margin: 1 }} onClick={() => handleEnrollClass(key)}>
+                    <Button disabled={isDisabled} key={classKey} variant="contained" color={btnColor} sx={{ margin: 1 }} onClick={() => handleEnrollClass(classKey)}>
                         {classContent.time}/{classContent.classType}/{classContent.instructor}/{numberOfAttendees}-{classContent.maxAttendees}
                     </Button>
                 )
             })
-            const pmClassBtnList = pmClassBtnKeyList.sort().map((key) => {
-                const classContent = wholeDayClasses[key]
+            const pmClassBtnList = pmClassBtnKeyList.sort().map((classKey) => {
+                const classContent = wholeDayClasses[classKey]
                 const numberOfAttendees = Object.keys(classContent.attendees).length
+                const isDisabled = (numberOfAttendees >= classContent.maxAttendees) && !(userClaims?.memberId as string in classContent.attendees)
+                const btnColor: "primary" | "success" = (userClaims?.memberId as string in classContent.attendees) ? 'success' : 'primary'
                 return (
-                    <Button key={key} variant="contained" color="primary" sx={{ margin: 1 }} onClick={() => handleEnrollClass(key)}>
+                    <Button disabled={isDisabled} key={classKey} variant="contained" color={btnColor} sx={{ margin: 1 }} onClick={() => handleEnrollClass(classKey)}>
                         {classContent.time}/{classContent.classType}/{classContent.instructor}/{numberOfAttendees}-{classContent.maxAttendees}
                     </Button>
                 )
@@ -89,18 +102,19 @@ export default function ClassDayTB(props: { date: string }) {
                     {dayjs(classDate).format('dddd, YYYY-MM-DD')}
                 </Typography>
             </Box>
-            <Box sx={{ borderBottom: '1px solid #ccc', my: 1 }} />
-            <Box sx={{ paddingX: 2, gap: 2, display: 'flex', flexWrap: 'wrap' }}> {amClassBtn}</Box>
-            <Box sx={{ borderBottom: '1px dotted #ccc', my: 1 }} />
-            <Box sx={{ paddingX: 2, gap: 2, display: 'flex', flexWrap: 'wrap' }}> {pmClassBtn}</Box>
-
-            {/* {openEditClass && <ClassEdit
-                open={openEditClass}
-                onClose={() => { setOpenEditClass(false); }}
+            {wholeDayClassList && <>
+                <Box sx={{ borderBottom: '1px solid #ccc', my: 1 }} />
+                <Box sx={{ paddingX: 2, gap: 2, display: 'flex', flexWrap: 'wrap' }}> {amClassBtn}</Box>
+                <Box sx={{ borderBottom: '1px dotted #ccc', my: 1 }} />
+                <Box sx={{ paddingX: 2, gap: 2, display: 'flex', flexWrap: 'wrap' }}> {pmClassBtn}</Box>
+            </>}
+            {openEnrollClass && wholeDayClassList && <ClassEnroll
+                open={openEnrollClass}
+                onClose={() => { setOpenEnrollClass(false); }}
                 classDate={classDate}
                 classWholeDateList={wholeDayClassList}
                 classKey={targetClassKey}
-            />} */}
+            />}
         </Container>
     );
 }

@@ -7,16 +7,17 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 
-import { useState } from 'react';
+import { Dispatch, SetStateAction, useState } from 'react';
 import { signInWithEmailAndPassword, setPersistence, browserSessionPersistence, browserLocalPersistence, sendPasswordResetEmail, signInWithPopup, GoogleAuthProvider, Auth, signInWithRedirect, getRedirectResult, UserCredential, FacebookAuthProvider } from 'firebase/auth';
 import { auth, authGoogleProvider } from '../utils/firebaseConfig';
 import { Copyright } from './CommonComponents';
 import { Alert } from '@mui/material';
 import Divider from '@mui/material/Divider';
 import { JSX } from 'react/jsx-runtime';
+import ClassSchedule from './ClassSchedule';
 
 
-export default function AuthLogin() {
+export default function AuthLogin(props: { setView: Dispatch<SetStateAction<JSX.Element>> }) {
     const [resMessage, setResMessage] = useState<JSX.Element | undefined>(undefined)
     const [isForgetPassword, setIsforgetPassword] = useState<boolean>(false)
     const [isPswResetEmailSent, setIsPswResetEmailSent] = useState<boolean>(false)
@@ -38,10 +39,7 @@ export default function AuthLogin() {
         setPersistence(auth, browserLocalPersistence).then(() => {
             signInWithEmailAndPassword(auth, login.email, login.password).then((result: UserCredential) => {
                 console.log('login success with password');
-                // result.user.getIdToken().then((idToken) => {
-                //     console.log('ID Token:', idToken); 
-                //     // You can now use the ID token for authentication or API calls
-                // });
+                props.setView(<ClassSchedule setView={props.setView} />)
             }).catch((error) => {
                 console.log(error.message);
                 setResMessage(<Alert severity="error">email/password incorrect</Alert>);
@@ -150,7 +148,7 @@ export default function AuthLogin() {
                     </>
                 }
             </Box>
-            <Copyright sx={{ mt: 8, mb: 4 }} />
+            {/* <Copyright sx={{ mt: 8, mb: 4 }} /> */}
         </Container>
     );
 }

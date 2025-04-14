@@ -53,30 +53,20 @@ export default function App() {
             <List sx={{ backgroundColor: '#1976d2', height: appBarHeight, padding: 0, boxShadow: 3 }} >
                 <ListItem >
                     <ListItemIcon> < AccountCircle /> </ListItemIcon>
-                    <ListItemText primary={userClaims?.role} sx={{ color: 'white' }} />
+                    <ListItemText primary={auth.currentUser?.displayName} sx={{ color: 'white' }} />
                 </ListItem>
             </List>
             <List>
-                <ListItemButton onClick={() => setView(<ClassSchedule />)}>
+                <ListItemButton onClick={() => setView(<ClassSchedule  setView={setView} />)}>
                     <ListItemIcon> <EventAvailableIcon /> </ListItemIcon>
                     <ListItemText primary="課堂時間表" />
                 </ListItemButton>
-
-                {/* <ListItemButton onClick={() => setView(<Member />)}>
-                    <ListItemIcon> <AccountBoxIcon /> </ListItemIcon>
-                    <ListItemText primary="會員" />
-                </ListItemButton> */}
-
-                {/* <ListItemButton>
-                    <ListItemIcon> <ReceiptIcon /> </ListItemIcon>
-                    <ListItemText primary="報表" />
-                </ListItemButton> */}
 
 
                 <Divider />
                 <ListItemButton onClick={() => handleLogOut()}>
                     <ListItemIcon> <Logout /> </ListItemIcon>
-                    <ListItemText primary={`登出 ${auth.currentUser?.displayName}`} />
+                    <ListItemText primary={'登出'} />
                 </ListItemButton>
             </List>
         </Box>
@@ -87,7 +77,7 @@ export default function App() {
     function handleLogOut() {
         auth.signOut().then(() => {
             console.log('user signed out');
-            setView(<AuthLogin />);
+            setView(<ClassSchedule setView={setView} />);
             setDrawerWidth(0)
         }).catch((error) => {
             console.log(error.message);
@@ -99,27 +89,30 @@ export default function App() {
             if (user) {
                 setDrawerWidth(250);
                 getIdTokenResult(user).then((idTokenResult) => {
+                    // console.log(idTokenResult.claims);
                     const cunstomClaims: CustomClaims = {
                         role: idTokenResult.claims.role as 'super-admin' | 'admin' | 'manager' | 'coach' | 'member',
                         roleLevel: idTokenResult.claims.roleLevel as 5 | 4 | 3 | 2 | 1,
+                        memberId: idTokenResult.claims.memberId as string,
                         createdBy: idTokenResult.claims.createdBy as string,
+                        displayName: idTokenResult.claims.name as string,
                     }
                     setUserClaims(cunstomClaims);
                     setUserIdToken(idTokenResult.token)
-                    setView(<ClassSchedule />);
+                    setView(<ClassSchedule setView={setView} />);
                 })
             } else {
                 setDrawerWidth(0);
-                setView(<ClassSchedule />);
+                setView(<ClassSchedule setView={setView} />);
             }
         })
         return () => { unsubscribe(); }
     }, [auth])
 
     useEffect(() => {
-        const  roleLevel = userClaims?.roleLevel as number;
-        if (roleLevel < 3) {
-            setErrorMessage('You are not authorized to access this system.')
+        if (!userClaims) return
+        if (userClaims.roleLevel !== 1) {
+            setErrorMessage('You are not yet a member.')
             handleLogOut()
         }
     }, [userClaims])
@@ -165,13 +158,10 @@ export default function App() {
                             </Drawer>
                         </Box>
                     }
-
-
                     {errorMessage && <MessageBox open={errorMessage ? true : false} onClose={() => setErrorMessage(undefined)} type='error' message={errorMessage} />}
                 </CustomClaimsCtx.Provider >
             </UserIdTokenCtx.Provider>
         </LocalizationProvider>
-
     );
 }
 

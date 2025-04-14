@@ -1,13 +1,9 @@
-import { createContext } from "react";
+import { createContext, Dispatch, SetStateAction, useContext } from 'react';
+import { JSX } from 'react/jsx-runtime';
+import { CustomClaims } from './dataInterface';
 
 
-export const CustomClaimsCtx = createContext<
-    {
-        role: 'super-admin' | 'admin' | 'manager' | 'coach' | 'member',
-        roleLevel: 5 | 4 | 3 | 2 | 1
-    } | undefined
->(undefined);
-
+export const CustomClaimsCtx = createContext<CustomClaims| undefined>(undefined);
 
 export const UserIdTokenCtx = createContext<string | undefined>(undefined);
 
