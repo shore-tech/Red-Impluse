@@ -96,7 +96,7 @@ export async function setUserRole(req: Request, res: Response, next: NextFunctio
         return
     });
     await auth.getUser(res.locals.targetUserUid).then((userRecord) => {
-        res.status(200).send(userRecord);
+        res.status(200).send({ userRecord: userRecord, claims: claims });
         next();
     }).catch((error) => {
         console.log('## setUserRole ---> error getting user:', error);
@@ -129,8 +129,8 @@ export async function updateUser(req: Request, res: Response, next: NextFunction
 export async function updateUserRole(req: Request, res: Response, next: NextFunction) {
     console.log(`\n-----> updateUserRole() ${dayjs().tz().format('DD MMM YYYY hh:mm:ss A Z')}`);
     try {
-        const user = await auth.getUser(res.locals.targetUserUid)
-        const currentClaims = user.customClaims || {};
+        const targetUser = await auth.getUser(res.locals.targetUserUid)
+        const currentClaims = targetUser.customClaims || {};
         const updatedClaims = {
             ...currentClaims,
             role: req.body.role,
@@ -138,13 +138,9 @@ export async function updateUserRole(req: Request, res: Response, next: NextFunc
         }
         await auth.setCustomUserClaims(res.locals.targetUserUid, updatedClaims).then(() => {
             console.log('## updateUserRole ---> custom claims updated');
-            res.status(200).send({ msg: 'User role updated.' });
+            res.status(200).send({ msg: 'User role updated.', updatedClaims: updatedClaims });
             next();
-        }).catch((error) => {
-            console.log('## updateUserRole ---> error setting custom claims:', error);
-            res.status(500).send('Error setting custom claims.'); // Ensure response is sent and function exits
-            return
-        });
+        })
     } catch (error) {
         console.log('## updateUserRole ---> error updating user role:', error);
         res.status(500).send({ msg: 'Error updating user role.', error: error }); // Ensure response is sent and function exits
