@@ -1,6 +1,6 @@
 
 export interface CustomClaims {
-    role: 'super-admin' | 'admin' | 'manager' | 'coach' | 'member',
+    role: 'super-admin' | 'admin' | 'manager' | 'assistance' | 'member',
     roleLevel: 5 | 4 | 3 | 2 | 1,
     memberId?: string,
     createdBy: string,

@@ -91,7 +91,7 @@ export default function App() {
                 getIdTokenResult(user).then((idTokenResult) => {
                     // console.log(idTokenResult.claims);
                     const cunstomClaims: CustomClaims = {
-                        role: idTokenResult.claims.role as 'super-admin' | 'admin' | 'manager' | 'coach' | 'member',
+                        role: idTokenResult.claims.role as 'super-admin' | 'admin' | 'manager' | 'assistance' | 'member',
                         roleLevel: idTokenResult.claims.roleLevel as 5 | 4 | 3 | 2 | 1,
                         memberId: idTokenResult.claims.memberId as string,
                         createdBy: idTokenResult.claims.createdBy as string,

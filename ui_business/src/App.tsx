@@ -114,7 +114,7 @@ export default function App() {
                 setDrawerWidth(250);
                 getIdTokenResult(user).then((idTokenResult) => {
                     const cunstomClaims: CustomClaims = {
-                        role: idTokenResult.claims.role as 'super-admin' | 'admin' | 'manager' | 'coach' | 'member',
+                        role: idTokenResult.claims.role as 'super-admin' | 'admin' | 'manager' | 'assistance' | 'member',
                         roleLevel: idTokenResult.claims.roleLevel as 5 | 4 | 3 | 2 | 1,
                         createdBy: idTokenResult.claims.createdBy as string,
                     }
