@@ -65,7 +65,7 @@ export default function MemberAdd(props: { open: boolean, onClose: () => void, m
             setErrorMessage(err.message)
             return
         })
-        
+
         // create authentication for user
         const claims = {
             role: 'member',
@@ -79,7 +79,7 @@ export default function MemberAdd(props: { open: boolean, onClose: () => void, m
             email: email,
             mobile: mobile,
             role: 'member',
-            roleLevel: 0,
+            roleLevel: 1,
             memberId: newMemberId,
         }, {
             headers: { Authorization: `Bearer ${userIdToken}` }
