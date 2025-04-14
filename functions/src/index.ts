@@ -3,7 +3,7 @@ import express from 'express';
 import cors from 'cors';
 // import { custom_claims } from './dataInterface';
 
-import { authenticateClient, createUser, deleteUser, setUserRole } from './middlesware';
+import { authenticateClient, createUser, deleteUser, setUserRole, updateUser, updateUserRole } from './middlesware';
 
 // date time
 import dayjs from 'dayjs';
@@ -43,6 +43,11 @@ app.post('/initSuperAdmin', authenticateClient, (req, res) => {
 app.post('/addSystemUser', authenticateClient, createUser, setUserRole, (req, res) => {
     console.log(`******************** end of ${req.path} ********************`);
 })
+
+app.post('/editSystemUser', authenticateClient, updateUser, updateUserRole, (req, res) => {
+    console.log(`******************** end of ${req.path} ********************`);
+})
+
 app.delete('/deleteSystemUser', authenticateClient, deleteUser, (req, res) => {
     console.log(`******************** end of ${req.path} ********************`);
 })

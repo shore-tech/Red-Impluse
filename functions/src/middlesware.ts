@@ -71,35 +71,87 @@ export async function createUser(req: Request, res: Response, next: NextFunction
     }).then((userRecord) => {
         console.log('## createUser ---> new user created');
         console.log(userRecord);
-        res.locals.newUserUid = userRecord.uid;
+        res.locals.targetUserUid = userRecord.uid;
+        next();
     }).catch((error) => {
         console.log('## createUser ---> error creating new user:', error);
         res.status(500).send({ msg: 'Error creating new user.', error: error }); // Ensure response is sent and function exits
         return
     });
-    next();
 }
 
 export async function setUserRole(req: Request, res: Response, next: NextFunction) {
     console.log(`\n-----> setUserRole() ${dayjs().tz().format('DD MMM YYYY hh:mm:ss A Z')}`);
-    const claims: custom_claims = { role: req.body.role, roleLevel: req.body.roleLevel, memberId: req.body.memberId, createdBy: res.locals.decodedToken.email };
-    await auth.setCustomUserClaims(res.locals.newUserUid, { ...claims }).then(() => {
+    const claims: custom_claims = {
+        role: req.body.role,
+        roleLevel: req.body.roleLevel,
+        memberId: req.body.memberId,
+        createdBy: res.locals.decodedToken.email
+    };
+    await auth.setCustomUserClaims(res.locals.targetUserUid, { ...claims }).then(() => {
         console.log('## setUserRole ---> custom claims set');
     }).catch((error) => {
         console.log('## setUserRole ---> error getting user:', error);
         res.status(500).send('Error getting user.'); // Ensure response is sent and function exits
         return
     });
-    await auth.getUser(res.locals.newUserUid).then((userRecord) => {
+    await auth.getUser(res.locals.targetUserUid).then((userRecord) => {
         res.status(200).send(userRecord);
-        return
+        next();
     }).catch((error) => {
         console.log('## setUserRole ---> error getting user:', error);
         res.status(500).send('Error getting user.'); // Ensure response is sent and function exits
         return
     });
-    next();
 }
+
+export async function updateUser(req: Request, res: Response, next: NextFunction) {
+    console.log(`\n-----> updateUser() ${dayjs().tz().format('DD MMM YYYY hh:mm:ss A Z')}`);
+    try {
+        const targetUsrRec = await auth.getUserByEmail(req.body.targetEmail)
+        res.locals.targetUserUid = targetUsrRec.uid;
+        await auth.updateUser(targetUsrRec.uid, {
+            displayName: req.body.displayName,
+        }).then((userRecord) => {
+            console.log('## updateUser ---> user updated');
+            console.log(userRecord);
+            res.locals.targetUserUid = userRecord.uid;
+            next();
+        })
+    } catch (error) {
+        console.log('## updateUser ---> error updating user:', error);
+        res.status(500).send({ msg: 'Error updating user.', error: error }); // Ensure response is sent and function exits
+        return
+    }
+}
+
+
+export async function updateUserRole(req: Request, res: Response, next: NextFunction) {
+    console.log(`\n-----> updateUserRole() ${dayjs().tz().format('DD MMM YYYY hh:mm:ss A Z')}`);
+    try {
+        const user = await auth.getUser(res.locals.targetUserUid)
+        const currentClaims = user.customClaims || {};
+        const updatedClaims = {
+            ...currentClaims,
+            role: req.body.role,
+            roleLevel: req.body.roleLevel,
+        }
+        await auth.setCustomUserClaims(res.locals.targetUserUid, updatedClaims).then(() => {
+            console.log('## updateUserRole ---> custom claims updated');
+            res.status(200).send({ msg: 'User role updated.' });
+            next();
+        }).catch((error) => {
+            console.log('## updateUserRole ---> error setting custom claims:', error);
+            res.status(500).send('Error setting custom claims.'); // Ensure response is sent and function exits
+            return
+        });
+    } catch (error) {
+        console.log('## updateUserRole ---> error updating user role:', error);
+        res.status(500).send({ msg: 'Error updating user role.', error: error }); // Ensure response is sent and function exits
+        return
+    }
+}
+
 
 export async function deleteUser(req: Request, res: Response, next: NextFunction) {
     console.log(`\n-----> deleteUser() ${dayjs().tz().format('DD MMM YYYY hh:mm:ss A Z')}`);
@@ -108,6 +160,7 @@ export async function deleteUser(req: Request, res: Response, next: NextFunction
         const userRecord = await auth.getUserByEmail(req.body.targetEmail)
         await auth.deleteUser(userRecord.uid)
         res.status(200).send({ msg: 'User deleted.' });
+        next();
     } catch (error) {
         res.status(404).send({ msg: 'User not found.', error: error }); // Ensure response is sent and function exits
         return
