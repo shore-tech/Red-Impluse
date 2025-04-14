@@ -211,7 +211,7 @@ export default function MemberEditBasic(props: { open: boolean, onClose: () => v
                         <Button variant="contained" sx={{ width: '50%', my: 1 }} onClick={() => setShowCfmDelBtn(!showCfmDelBtn)} disabled={!userIdToken  }>
                             {showCfmDelBtn ? '取消刪除' : '刪除會員'}
                         </Button>
-                        {showCfmDelBtn && <Button variant="contained" onClick={deleteMember} sx={{ width: '50%', my: 1 }}>確定刪除?</Button>}
+                        {showCfmDelBtn && <Button variant="contained" color='error' onClick={deleteMember} sx={{ width: '50%', my: 1 }}>確定刪除?</Button>}
                     </Grid>
                 </Grid >
 

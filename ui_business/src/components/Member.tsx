@@ -103,6 +103,7 @@ export default function Member() {
             </Box>
             <Box sx={{ width: '100%', overflow: 'auto' }}>
                 <DataGrid
+                    disableColumnMenu
                     slots={{ toolbar: CustomToolbar }}
                     loading={isLoading}
                     rows={tableRows}
