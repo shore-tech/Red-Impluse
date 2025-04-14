@@ -40,7 +40,12 @@ app.post('/initSuperAdmin', authenticateClient, (req, res) => {
 
 
 // ********************** APIs for add System Users **********************
-
+app.post('/addSystemUser', authenticateClient, createUser, setUserRole, (req, res) => {
+    console.log(`******************** end of ${req.path} ********************`);
+})
+app.delete('/deleteSystemUser', authenticateClient, deleteUser, (req, res) => {
+    console.log(`******************** end of ${req.path} ********************`);
+})
 
 // ********************** APIs for Members **********************
 app.post('/addMember', authenticateClient, createUser, setUserRole,(req, res) => {
