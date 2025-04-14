@@ -6,6 +6,20 @@ export interface CustomClaims {
     createdBy: string,
 }
 
+// **************** System User ****************
+export interface SystemUserObj {
+    id?: string,
+    email: string,
+    firstName: string,
+    lastName: string,
+    displayName: string,
+    mobile: string,
+    role: 'super-admin' | 'admin' | 'manager' | 'assistance' | 'member',
+    roleLevel: 5 | 4 | 3 | 2 | 1,
+    createdBy: string,
+    createdAt?: string,
+}
+
 
 
 // **************** Member ****************

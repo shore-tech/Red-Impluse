@@ -13,7 +13,9 @@ import MenuIcon from '@mui/icons-material/Menu';
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import AccountBoxIcon from '@mui/icons-material/AccountBox';
 import ReceiptIcon from '@mui/icons-material/Receipt';
+import PrintIcon from '@mui/icons-material/Print';
 import SportsGymnasticsIcon from '@mui/icons-material/SportsGymnastics';
+import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 
 // local components
 import AuthLogin from './components/AuthLogin';
@@ -31,6 +33,7 @@ import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import ClassSchCoach from './components/ClassSchCoach';
 import { MessageBox } from './components/CommonComponents';
+import SystemUser from './components/SystemUser';
 dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.tz.setDefault("Asia/Hong_Kong");
@@ -72,10 +75,10 @@ export default function App() {
                     <ListItemText primary="會員" />
                 </ListItemButton>
 
-                <ListItemButton>
+                {/* <ListItemButton>
                     <ListItemIcon> <ReceiptIcon /> </ListItemIcon>
                     <ListItemText primary="報表" />
-                </ListItemButton>
+                </ListItemButton> */}
 
                 <Divider />
                 <ListItemButton onClick={() => setView(<ClassSchCoach />)}>
@@ -83,10 +86,15 @@ export default function App() {
                     <ListItemText primary="教練列表" />
                 </ListItemButton>
                 <ListItemButton onClick={() => setView(<ClassSchTmp />)}>
-                    <ListItemIcon > <ReceiptIcon /> </ListItemIcon>
+                    <ListItemIcon > <PrintIcon /> </ListItemIcon>
                     <ListItemText primary="時間表模板" />
                 </ListItemButton>
 
+                <Divider />
+                <ListItemButton onClick={() => setView(<SystemUser />)}>
+                    <ListItemIcon > <ManageAccountsIcon /> </ListItemIcon>
+                    <ListItemText primary="系統管理" />
+                </ListItemButton>
                 <Divider />
                 <ListItemButton onClick={() => handleLogOut()}>
                     <ListItemIcon> <Logout /> </ListItemIcon>
