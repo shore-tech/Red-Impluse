@@ -7,6 +7,9 @@
       "hosting": {
         "ui_business": [
           "ui-business"
+        ],
+        "ui_member": [
+          "red-impluse"
         ]
       }
     }
