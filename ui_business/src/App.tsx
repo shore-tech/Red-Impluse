@@ -118,7 +118,6 @@ export default function App() {
                         roleLevel: idTokenResult.claims.roleLevel as 5 | 4 | 3 | 2 | 1,
                         createdBy: idTokenResult.claims.createdBy as string,
                     }
-                    console.log('id token', idTokenResult.token);
                     setUserClaims(cunstomClaims);
                     setUserIdToken(idTokenResult.token)
                     setView(<ClassSchedule />);
@@ -154,7 +153,7 @@ export default function App() {
                     <Box sx={{ width: { md: `calc(100% - ${drawerWidth}px)`, xs: '100%' } }}>
                         <AppBar position="sticky" ref={appBarRef}>
                             <Toolbar >
-                                <Avatar src="/favicon.ico" sx={{ mr: 2 }} />
+                                <Avatar src="/favicon.ico" sx={{ mr: 2 }}/>
                                 <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
                                     赤兔道場-管理系統
                                 </Typography>

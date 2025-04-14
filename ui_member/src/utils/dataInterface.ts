@@ -2,8 +2,9 @@
 export interface CustomClaims {
     role: 'super-admin' | 'admin' | 'manager' | 'coach' | 'member',
     roleLevel: 5 | 4 | 3 | 2 | 1,
-    companyId?: string,
+    memberId?: string,
     createdBy: string,
+    displayName?: string,
 }
 
 
