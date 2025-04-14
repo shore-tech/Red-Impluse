@@ -118,9 +118,10 @@ export default function App() {
                         roleLevel: idTokenResult.claims.roleLevel as 5 | 4 | 3 | 2 | 1,
                         createdBy: idTokenResult.claims.createdBy as string,
                     }
+                    console.log('id token', idTokenResult.token);
                     setUserClaims(cunstomClaims);
                     setUserIdToken(idTokenResult.token)
-                    setView(<ClassSchCoach />);
+                    setView(<ClassSchedule />);
                 })
             } else {
                 setDrawerWidth(0);

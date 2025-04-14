@@ -14,7 +14,7 @@ import { btnBox, LoadingBox, MessageBox, styleFormHeadBox, styleModalBox } from 
 import { UserIdTokenCtx } from "../utils/contexts";
 
 import { MemberObj } from "../utils/dataInterface";
-import { db } from "../utils/firebaseConfig";
+import { auth, db } from "../utils/firebaseConfig";
 import axios from "axios";
 import { cloudServerUrl, localServerUrl } from "../utils/firebaseConfigDetails";
 
@@ -45,47 +45,10 @@ export default function MemberAdd(props: { open: boolean, onClose: () => void, m
         // check if email is existed
         if (props.memberEmailList.includes(email)) { setErrorMessage(`Email ${email} is already existed!`); return }
 
-        // create authentication for user
-        // axios.post(`${localServerUrl}/addMember`, {
-        axios.post(`${cloudServerUrl}/addMember`, {
-            displaName: `${firstName} ${lastName}`,
-            email: email,
-            mobile: mobile,
-            role: 'member',
-            roleLevel: 0,
-        }, {
-            headers: { Authorization: `Bearer ${userIdToken}` }
-        }).then((res) => {
-            console.log('res: ', res);
-            if (res.status === 200) {
-                setSuccessMessage(`New member ${newMemberId} added successfully.`);
-            } else {
-                setErrorMessage(`Error ${res.status}: `);
-                return
-            }
-        }).catch((err) => {
-            setErrorMessage(`${err.response.data.error}`);
-            return
-        })
-        // set member obj for database
-        const newMember: MemberObj = {
-            firstName: firstName,
-            lastName: lastName,
-            fullName: `${firstName} ${lastName}`,
-            email: email,
-            mobile: mobile,
-            gender: gender,
-            dateOfBirth: dateOfBirth,
-            join_date: joinDate,
-            // mbsExpDate: mbsExpDate,
-            address: address,
-            beltColor: beltColor,
-            stripe: stripe,
-        }
-        const summaryDocRef = doc(db, '/member_list/summary')
         // calaulate the new member id
         let newMemberId = ''
         let summaryDocData = {}
+        const summaryDocRef = doc(db, '/member_list/summary')
         setIsLoading(true)
         // generate new member id
         await getDoc(summaryDocRef).then(doc => {
@@ -102,6 +65,52 @@ export default function MemberAdd(props: { open: boolean, onClose: () => void, m
             setErrorMessage(err.message)
             return
         })
+        
+        // create authentication for user
+        const claims = {
+            role: 'member',
+            roleLevel: 0,
+            memberId: newMemberId,
+            createdBy: auth.currentUser!.email
+        }
+        // axios.post(`${localServerUrl}/addMember`, {
+        axios.post(`${cloudServerUrl}/addMember`, {
+            displayName: `${firstName} ${lastName}`,
+            email: email,
+            mobile: mobile,
+            role: 'member',
+            roleLevel: 0,
+            memberId: newMemberId,
+        }, {
+            headers: { Authorization: `Bearer ${userIdToken}` }
+        }).then((res) => {
+            console.log('res: ', res);
+            if (res.status === 200) {
+                setSuccessMessage(`New member ${newMemberId} added successfully.`);
+            } else {
+                setErrorMessage(`Error ${res.status}: `);
+                return
+            }
+        }).catch((err) => {
+            setErrorMessage(`${err.response.data.error}`);
+            return
+        })
+
+        // set member obj for database
+        const newMember: MemberObj = {
+            firstName: firstName,
+            lastName: lastName,
+            fullName: `${firstName} ${lastName}`,
+            email: email,
+            mobile: mobile,
+            gender: gender,
+            dateOfBirth: dateOfBirth,
+            join_date: joinDate,
+            // mbsExpDate: mbsExpDate,
+            address: address,
+            beltColor: beltColor,
+            stripe: stripe,
+        }
         // add new member to summary doc
         await updateDoc(summaryDocRef, { [newMemberId]: newMember }).then(() => {
             console.log(`New member ${newMemberId} added to summary successfully.`)

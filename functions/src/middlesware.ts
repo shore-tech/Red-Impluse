@@ -58,15 +58,15 @@ export function initSuperAdmin(req: Request, res: Response, next: NextFunction) 
 
 export async function createUser(req: Request, res: Response, next: NextFunction) {
     console.log(`\n-----> createUser() ${dayjs().tz().format('DD MMM YYYY hh:mm:ss A Z')}`);
-    console.log(req.body);
+    // check if the user is authenticated
     const userRoleLevel = res.locals.decodedToken.roleLevel;
     const targetRoleLevel = req.body.roleLevel;
     if (userRoleLevel < 3 || userRoleLevel < targetRoleLevel) { res.status(401).send('Unauthorized'); return }
     await auth.createUser({
+        displayName: req.body.displayName,
         email: req.body.email,
         emailVerified: false,
         password: req.body.mobile,
-        displayName: req.body.displayName,
         disabled: false,
     }).then((userRecord) => {
         console.log('## createUser ---> new user created');
@@ -82,7 +82,7 @@ export async function createUser(req: Request, res: Response, next: NextFunction
 
 export async function setUserRole(req: Request, res: Response, next: NextFunction) {
     console.log(`\n-----> setUserRole() ${dayjs().tz().format('DD MMM YYYY hh:mm:ss A Z')}`);
-    const claims: custom_claims = { role: req.body.role, roleLevel: req.body.roleLevel, createdBy: res.locals.decodedToken.email };
+    const claims: custom_claims = { role: req.body.role, roleLevel: req.body.roleLevel, memberId: req.body.memberId, createdBy: res.locals.decodedToken.email };
     await auth.setCustomUserClaims(res.locals.newUserUid, { ...claims }).then(() => {
         console.log('## setUserRole ---> custom claims set');
     }).catch((error) => {
